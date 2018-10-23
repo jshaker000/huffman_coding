@@ -5,8 +5,9 @@
 #implementation to _OBJ
 INSTALLDIR=/usr/local/bin
 
-IDIR=$(PWD)/../include
-ODIR=$(PWD)/../obj
+SRCDIR=.
+IDIR=$(SRCDIR)/../include
+ODIR=$(SRCDIR)/../obj
 
 CXX=g++
 CXXFLAGS=-std=c++11 -O2 -I$(IDIR)
@@ -23,17 +24,17 @@ MAINS = $(patsubst %,$(ODIR)/%,$(_MAINS))
 all: huffman_encode huffman_decode huffman_codes
 
 install: all
-	cp $(PWD)/huffman_encode $(INSTALLDIR)/huffman_encode
-	cp $(PWD)/huffman_decode $(INSTALLDIR)/huffman_decode
-	cp $(PWD)/huffman_codes  $(INSTALLDIR)/huffman_codes
+	cp $(SRCDIR)/huffman_encode $(INSTALLDIR)/huffman_encode
+	cp $(SRCDIR)/huffman_decode $(INSTALLDIR)/huffman_decode
+	cp $(SRCDIR)/huffman_codes  $(INSTALLDIR)/huffman_codes
 
 uninstall:
 	rm -f $(INSTALLDIR)/huffman_encode $(INSTALLDIR)/huffman_decode $(INSTALLDIR)/huffman_codes
 
 remove:
-	rm -f $(PWD)/huffman_encode $(PWD)/huffman_decode $(PWD)/huffman_codes
+	rm -f $(SRCDIR)/huffman_encode $(SRCDIR)/huffman_decode $(SRCDIR)/huffman_codes
 
-$(ODIR)/%.o: $(PWD)/%.cpp $(DEPS)
+$(ODIR)/%.o: $(SRCDIR)/%.cpp $(DEPS)
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
 
 huffman_encode: $(filter-out $(MAINS), $(OBJ)) $(ODIR)/huffman_encode.o
