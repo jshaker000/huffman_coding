@@ -1,3 +1,6 @@
+#ifndef ANCILLARY_FUNCTIONS
+#define ANCILLARY_FUNCTIONS
+
 #include <functional>
 #include <string>
 
@@ -81,3 +84,5 @@ std::string printable_ASCII ( unsigned char c )
             }
     }
 }
+
+#endif
