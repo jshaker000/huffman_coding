@@ -1,0 +1,51 @@
+-------------------------------------------------------
+
+Huffman Coding is a suite of packages that work with 
+the huffman encoding algorithm to map out, compress,
+and decompress files.
+
+Huffman encoding is based on the idea that more
+frequently occuring symbols can be represented with 
+less than 8 bits to compress the data, and less 
+frequently occuring symbols may take more than 8 bits
+
+Huffman encoding works best on files that have a skewed
+distribution of bits. It is not as efficient on fairly uniform
+data, like wav files or encrypted data
+
+Huffman encoding also places a header infront of the encoded 
+data. If the file is small enough, the gained compression
+may not be worth the cost of the header
+
+This program comes with 3 executables
+
+huffman_codes :  generates and prints the huffman codes
+                 of the symbols from stdin or from a file
+                 to stdout or a file
+
+huffman_enocode: compresses data from an infile to stdout 
+                 or a file using huffman coding
+
+huffman_decode:  decompress data from stdin or a file 
+                 compressed with huffman_encode to 
+                 stdout or a file
+
+To install, cd into src/ and
+make && sudo make install
+
+-------------------------------------------------------
+
+BUGS / FUTURE WORK
+
+-allow huffman_encode to read from a stream in
+-dynamically reduce the size of the header
+-reduce dependance on endianness in decode
+-use an output buffer to print when decoding
+-perhaps merge into one executable with flags vs 3
+
+**UPDATES MAY CHANGE THE FILE FORMAT, THIS IS STILL IN BETA
+BE CAREFUL AND READ UPDATES TO THE README AND ROLL BACK
+IF YOU NEED TO
+
+if you find any other bugs or have any suggestions, please 
+send them to jshakes213@gmail.com    
