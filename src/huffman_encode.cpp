@@ -104,7 +104,7 @@ int main ( int argc, char* argv[])
     //number the non zero frequencies
     int num_unique_chars = 0;
     
-    for ( int i = 0; frequencies[ i ].second; i++ )
+    for ( int i = 0; i < 256 && frequencies[ i ].second; i++ )
     {
         num_unique_chars++;
     }
@@ -130,18 +130,19 @@ int main ( int argc, char* argv[])
     }
 
     //write the number of symbol codes to the file
-    out_f << static_cast<char>( ( num_unique_chars >> 8 ) & 0xFF ) <<  static_cast<char>( ( num_unique_chars >> 0 ) & 0xFF );
+    out_f.put( static_cast<char>( ( num_unique_chars >> 8 ) & 0xFF ) );
+    out_f.put( static_cast<char>( ( num_unique_chars >> 0 ) & 0xFF ) );
     new_length_bits += 2;
 
     //print symbol codes to the file
     //SYMBOL[ 1 byte ]  LENGTH[ 1 byte ]  CODE[ 8 bytes ]
     for ( int i = 0; i < num_unique_chars; i++ )
     {
-       out_f << static_cast<char>( frequencies[ i ].first )
-             << static_cast<char>( huffman_map[ ( frequencies[ i ].first ) ].first );
+       out_f.put( static_cast<char>( frequencies[ i ].first ) );
+       out_f.put( static_cast<char>( huffman_map[ ( frequencies[ i ].first ) ].first ) );
 
        for ( int j = 0; j < 8; j++ )
-            out_f << static_cast<char>( ( huffman_map[ ( frequencies[ i ].first ) ].second >> ( 8 * ( 7 - j ) ) ) & 0xFF );
+            out_f.put( static_cast<char>( ( huffman_map[ ( frequencies[ i ].first ) ].second >> ( 8 * ( 7 - j ) ) ) & 0xFF ) );
         new_length_bits += 10 * 8; // 10 bytes per symbol
     }
 
