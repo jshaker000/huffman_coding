@@ -45,7 +45,7 @@ int main ( int argc, char* argv[])
     }
     else
     {
-        std::cerr << "Synatx: huffman_decode <in file> <outfile>" << std::endl;
+        std::cerr << "DECODE: Synatx: huffman_decode <infile> <outfile>" << std::endl;
         return 1;
     }
     
@@ -53,7 +53,7 @@ int main ( int argc, char* argv[])
 
     if ( in_f.fail() )
     {
-        std::cerr << "Error opening " << in << std::endl;
+        std::cerr << "DECODE: Error opening " << in << std::endl;
         return 2;
     }
 
@@ -101,7 +101,7 @@ int main ( int argc, char* argv[])
 
         if ( !huffman_map.emplace( p, value ).second )
         {
-            std::cerr << "key collision. error" << std::endl;
+            std::cerr << "DECODE: key collision building hashtable. error" << std::endl;
             return 3;
         }
     }
@@ -109,7 +109,7 @@ int main ( int argc, char* argv[])
     std::fstream out_f( out, std::ios::binary | std::ios::out);
     if ( out_f.fail() )
     {
-        std::cerr << "Error opening " << out << std::endl;
+        std::cerr << "DECODE: Error opening " << out << std::endl;
         return 4;
     }
 

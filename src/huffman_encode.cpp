@@ -33,7 +33,7 @@ int main ( int argc, char* argv[])
 
     if( isatty( STDIN_FILENO ) == 0 )
     {
-        std::cerr << "Input must currently be from a file :(" << std::endl;
+        std::cerr << "ENCODE: Input must currently be from a file :(" << std::endl;
         return 1;
         //in = "/dev/stdin";
         //out = ( argc == 1 ? "/dev/stdout" : argv[ 1 ] );
@@ -46,7 +46,7 @@ int main ( int argc, char* argv[])
     }
     else
     {
-        std::cerr << "Synatx: huffman_encode <in file> <outfile>" << std::endl;
+        std::cerr << "ENCODE: Synatx: huffman_encode <infile> <outfile>" << std::endl;
         return 1;
     }
 
@@ -54,7 +54,7 @@ int main ( int argc, char* argv[])
 
     if ( in_f.fail() )
     {
-        std::cerr << "Error opening " << in << std::endl;
+        std::cerr << "ENCODE: Error opening " << in << std::endl;
         return 2;
     }
 
@@ -111,7 +111,7 @@ int main ( int argc, char* argv[])
 
     if ( num_unique_chars == 0 )
     {
-        std::cerr << "In file appears to be empty. Exiting" << std::endl;
+        std::cerr << "ENCODE: In file appears to be empty. Exiting" << std::endl;
         return 3;
     }
     
@@ -125,7 +125,7 @@ int main ( int argc, char* argv[])
     std::fstream out_f( out, std::ios::binary | std::ios::out);
     if ( out_f.fail() )
     {
-        std::cerr << "Error opening " << out << std::endl;
+        std::cerr << "ENCODE: Error opening " << out << std::endl;
         return 4;
     }
 
@@ -169,7 +169,7 @@ int main ( int argc, char* argv[])
 
     in_f.close();
 
-    std::cerr << "DEFALTION RATE: " << std::setprecision( 4 ) 
+    std::cerr << "ENCODE: DEFALTION RATE: " << std::setprecision( 4 ) 
               << static_cast<float>( 100 * new_length_bits ) / old_length_bits << '%' << std::endl;
 
     return 0;

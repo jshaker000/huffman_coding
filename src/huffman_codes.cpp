@@ -32,7 +32,7 @@ int main ( int argc, char* argv[])
     }
     else
     {
-        std::cerr << "Synatx: huffman_codes <in file> <outfile>" << std::endl;
+        std::cerr << "CODES: Synatx: huffman_codes <in file> <outfile>" << std::endl;
         return 1;
     }
     
@@ -40,7 +40,7 @@ int main ( int argc, char* argv[])
 
     if ( in_f.fail() )
     {
-        std::cerr << "Error opening " << in << std::endl;
+        std::cerr << "CODES: Error opening " << in << std::endl;
         return 2;
     }
 
@@ -101,7 +101,7 @@ int main ( int argc, char* argv[])
 
     if ( num_unique_chars == 0 )
     {
-        std::cerr << "In file appears to be empty. Exiting" << std::endl;
+        std::cerr << "CODES: In file appears to be empty. Exiting" << std::endl;
         return 3;
     }
 
@@ -116,7 +116,7 @@ int main ( int argc, char* argv[])
     std::fstream out_f( out, std::ios::binary | std::ios::out);
     if ( out_f.fail() )
     {
-        std::cerr << "Error opening " << out << std::endl;
+        std::cerr << "CODES: Error opening " << out << std::endl;
         return 4;
     }
 
