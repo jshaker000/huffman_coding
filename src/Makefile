@@ -5,45 +5,48 @@
 #implementation to _OBJ
 INSTALLDIR=/usr/local/bin
 
-SRCDIR=.
-IDIR=$(SRCDIR)/../include
-ODIR=$(SRCDIR)/../obj
-
+SRCDIR=$(PWD)
+IDIR  =$(PWD)/../include
+ODIR  =$(PWD)/../obj
 CXX=g++
 CXXFLAGS=-std=c++11 -O2 -I$(IDIR)
+
+MAIN1=huffman_encode
+MAIN2=huffman_decode
+MAIN3=huffman_codes
 
 _DEPS = bit_writer.h huffman_tree.h ancillary_functions.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ= huffman_encode.o huffman_decode.o huffman_codes.o huffman_tree.o bit_writer.o
+_OBJ= $(MAIN1).o $(MAIN2).o $(MAIN3).o huffman_tree.o bit_writer.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
-_MAINS = huffman_encode.o huffman_decode.o huffman_codes.o
+_MAINS = $(MAIN1).o $(MAIN2).o $(MAIN3).o
 MAINS = $(patsubst %,$(ODIR)/%,$(_MAINS))
 
 all: huffman_encode huffman_decode huffman_codes
 
 install: all
-	cp $(SRCDIR)/huffman_encode $(INSTALLDIR)/huffman_encode
-	cp $(SRCDIR)/huffman_decode $(INSTALLDIR)/huffman_decode
-	cp $(SRCDIR)/huffman_codes  $(INSTALLDIR)/huffman_codes
+	cp $(SRCDIR)/$(MAIN1) $(INSTALLDIR)/$(MAIN1)
+	cp $(SRCDIR)/$(MAIN2) $(INSTALLDIR)/$(MAIN2)
+	cp $(SRCDIR)/$(MAIN3)  $(INSTALLDIR)/$(MAIN3)
 
 uninstall:
-	rm -f $(INSTALLDIR)/huffman_encode $(INSTALLDIR)/huffman_decode $(INSTALLDIR)/huffman_codes
+	rm -f $(INSTALLDIR)/$(MAIN1) $(INSTALLDIR)/$(MAIN2) $(INSTALLDIR)/$(MAIN3)
 
 remove:
-	rm -f $(SRCDIR)/huffman_encode $(SRCDIR)/huffman_decode $(SRCDIR)/huffman_codes
+	rm -f $(SRCDIR)/$(MAIN1) $(SRCDIR)/$(MAIN2) $(SRCDIR)/$(MAIN3)
 
 $(ODIR)/%.o: $(SRCDIR)/%.cpp $(DEPS)
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
 
-huffman_encode: $(filter-out $(MAINS), $(OBJ)) $(ODIR)/huffman_encode.o
+$(MAIN1): $(filter-out $(MAINS), $(OBJ)) $(ODIR)/$(MAIN1).o
 	$(CXX) -o $@ $^ $(CXXFLAGS) 
 
-huffman_decode: $(filter-out $(MAINS), $(OBJ)) $(ODIR)/huffman_decode.o
+$(MAIN2): $(filter-out $(MAINS), $(OBJ)) $(ODIR)/$(MAIN2).o
 	$(CXX) -o $@ $^ $(CXXFLAGS) 
 
-huffman_codes: $(filter-out $(MAINS), $(OBJ)) $(ODIR)/huffman_codes.o
+$(MAIN3): $(filter-out $(MAINS), $(OBJ)) $(ODIR)/$(MAIN3).o
 	$(CXX) -o $@ $^ $(CXXFLAGS) 
 
 .PHONY: clean
