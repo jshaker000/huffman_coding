@@ -4,10 +4,9 @@
 #To add a header template / implementation pair, add the header to _DEPS and the
 #implementation to _OBJ
 INSTALLDIR=/usr/local/bin
-
-SRCDIR=$(PWD)
-IDIR  =$(PWD)/../include
-ODIR  =$(PWD)/../obj
+SRCDIR=${CURDIR}
+IDIR  =${CURDIR}/../include
+ODIR  =${CURDIR}/../obj
 CXX=g++
 CXXFLAGS=-std=c++11 -O2 -I$(IDIR)
 
@@ -27,9 +26,9 @@ MAINS = $(patsubst %,$(ODIR)/%,$(_MAINS))
 all: huffman_encode huffman_decode huffman_codes
 
 install: all
-	cp $(SRCDIR)/$(MAIN1) $(INSTALLDIR)/$(MAIN1)
-	cp $(SRCDIR)/$(MAIN2) $(INSTALLDIR)/$(MAIN2)
-	cp $(SRCDIR)/$(MAIN3)  $(INSTALLDIR)/$(MAIN3)
+	cp -f $(SRCDIR)/$(MAIN1) $(INSTALLDIR)/$(MAIN1)
+	cp -f $(SRCDIR)/$(MAIN2) $(INSTALLDIR)/$(MAIN2)
+	cp -f $(SRCDIR)/$(MAIN3) $(INSTALLDIR)/$(MAIN3)
 
 uninstall:
 	rm -f $(INSTALLDIR)/$(MAIN1) $(INSTALLDIR)/$(MAIN2) $(INSTALLDIR)/$(MAIN3)
