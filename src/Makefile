@@ -23,7 +23,7 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 _MAINS = $(MAIN1).o $(MAIN2).o $(MAIN3).o
 MAINS = $(patsubst %,$(ODIR)/%,$(_MAINS))
 
-all: huffman_encode huffman_decode huffman_codes
+all: $(MAIN1) $(MAIN2) $(MAIN3)
 
 install: all
 	cp -f $(SRCDIR)/$(MAIN1) $(INSTALLDIR)/$(MAIN1)
