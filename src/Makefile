@@ -14,14 +14,16 @@ MAIN1=huffman_encode
 MAIN2=huffman_decode
 MAIN3=huffman_codes
 
+TARGETS = huffman_encode huffman_decode huffman_codes
+
 _DEPS = bit_writer.h huffman_tree.h ancillary_functions.h
-DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
+DEPS  = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ= $(MAIN1).o $(MAIN2).o $(MAIN3).o huffman_tree.o bit_writer.o
-OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
-
-_MAINS = $(MAIN1).o $(MAIN2).o $(MAIN3).o
+_MAINS = $(addsuffix .o, $(TARGETS) )
 MAINS = $(patsubst %,$(ODIR)/%,$(_MAINS))
+
+_OBJ= huffman_tree.o bit_writer.o $(_MAINS)
+OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 .PHONY: all install uninstall remove clean
 
@@ -41,14 +43,8 @@ remove:
 clean:
 	rm -f $(ODIR)/*.o
 
-$(ODIR)/%.o: $(SRCDIR)/%.cpp $(DEPS)
+$(OBJ): $(ODIR)/%.o : $(SRCDIR)/%.cpp $(DEPS)
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
 
-$(MAIN1): $(filter-out $(MAINS), $(OBJ)) $(ODIR)/$(MAIN1).o
-	$(CXX) -o $@ $^ $(CXXFLAGS) 
-
-$(MAIN2): $(filter-out $(MAINS), $(OBJ)) $(ODIR)/$(MAIN2).o
-	$(CXX) -o $@ $^ $(CXXFLAGS) 
-
-$(MAIN3): $(filter-out $(MAINS), $(OBJ)) $(ODIR)/$(MAIN3).o
+$(TARGETS): % : $(filter-out $(MAINS), $(OBJ)) $(ODIR)/%.o
 	$(CXX) -o $@ $^ $(CXXFLAGS) 
