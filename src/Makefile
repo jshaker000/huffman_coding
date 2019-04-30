@@ -23,6 +23,8 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 _MAINS = $(MAIN1).o $(MAIN2).o $(MAIN3).o
 MAINS = $(patsubst %,$(ODIR)/%,$(_MAINS))
 
+.PHONY: all install uninstall remove clean
+
 all: $(MAIN1) $(MAIN2) $(MAIN3)
 
 install: all
@@ -36,6 +38,9 @@ uninstall:
 remove:
 	rm -f $(SRCDIR)/$(MAIN1) $(SRCDIR)/$(MAIN2) $(SRCDIR)/$(MAIN3)
 
+clean:
+	rm -f $(ODIR)/*.o
+
 $(ODIR)/%.o: $(SRCDIR)/%.cpp $(DEPS)
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
 
@@ -47,8 +52,3 @@ $(MAIN2): $(filter-out $(MAINS), $(OBJ)) $(ODIR)/$(MAIN2).o
 
 $(MAIN3): $(filter-out $(MAINS), $(OBJ)) $(ODIR)/$(MAIN3).o
 	$(CXX) -o $@ $^ $(CXXFLAGS) 
-
-.PHONY: clean
-
-clean:
-	rm -f $(ODIR)/*.o
