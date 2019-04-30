@@ -22,8 +22,8 @@ DEPS    := $(patsubst %,$(IDIR)/%,$(_DEPS))
 _MAINS  := $(addsuffix .o, $(TARGETS) )
 MAINS   := $(patsubst %,$(ODIR)/%,$(_MAINS))
 
-_OBJ= huffman_tree.o bit_writer.o $(_MAINS)
-OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
+_OBJ    := huffman_tree.o bit_writer.o $(_MAINS)
+OBJ     := $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 .PHONY: all install uninstall remove clean
 
