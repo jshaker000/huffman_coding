@@ -7,8 +7,10 @@
 #include <utility>
 #include <unordered_map>
 
-//expects to take in a sorted array of pairs
+// expects to take in a sorted array of pairs
 // <symbol, frequency>
+// and then be used to parse into an unordered map of
+// <symbol, <length,encoding>> for encoding
 class huffman_tree
 {
     public:
@@ -22,7 +24,7 @@ class huffman_tree
         {
             std::unique_ptr <struct huffman_tree::huffman_node> left  = nullptr;
             std::unique_ptr <struct huffman_tree::huffman_node> right = nullptr;
-            int frequency = 0;
+            std::uint64_t frequency = 0;
             char data = 0;
         };
 

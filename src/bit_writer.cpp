@@ -18,7 +18,7 @@ bit_writer::~bit_writer()
 
 // adds the smallest bits_to_add of bits into the buffer and saves the new position
 // flush buffer when needed
-void bit_writer::add_bits(char bits_to_add, std::uint64_t bits )
+void bit_writer::add_bits(std::uint8_t bits_to_add, std::uint64_t bits)
 {
     int index_to_add = current_bits / 8;
     int slot_to_add  = current_bits % 8;
