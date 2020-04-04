@@ -2,11 +2,11 @@
 
 #include "huffman_tree.h"
 
-huffman_tree::huffman_tree( std::pair <char, std::uint64_t> frequency[256])
+huffman_tree::huffman_tree(const std::array<std::pair <char, std::uint64_t>,256> & frequency)
 {
     //finds the bottommost nonzero frequency symbol
-    int position = 255;
-    while ( position && frequency[position].second == 0 )
+    int position = frequency.size() - 1;
+    while (position && frequency[position].second == 0)
         position--;
 
     //special case of input file only having one character

@@ -1,6 +1,7 @@
 #ifndef HUFFMAN_TREE
 #define HUFFMAN_TREE
 
+#include <array>
 #include <cstdint>
 #include <memory>
 #include <utility>
@@ -11,7 +12,7 @@
 class huffman_tree
 {
     public:
-        huffman_tree(std::pair <char, std::uint64_t> frequencies [256]);
+        huffman_tree(const std::array<std::pair <char, std::uint64_t>,256> &);
         void fill_unordered_map (std::unordered_map<char, std::pair<char, std::uint64_t>> & );
     private:
        //pointers to its children, left and right

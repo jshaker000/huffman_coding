@@ -1,5 +1,6 @@
-//prints the huffman codes of a file in a nicely formatted table
+// prints the huffman codes of a file in a nicely formatted table
 
+#include <array>
 #include <cstdint>
 #include <iostream>
 #include <iomanip>
@@ -48,72 +49,69 @@ int main ( int argc, char* argv[])
     constexpr int buffsize = 256*1024;
     char buffer[ buffsize ];
 
-    std::pair <char, std::uint64_t> frequencies [ 256 ];
+    std::array<std::pair <char, std::uint64_t>,256> frequencies;
 
     std::uint64_t old_length_bits = 0;
     std::uint64_t new_length_bits = 0;
     int num_unique_chars = 0;
 
-    for ( int i = 0; i < 256; i++ )
+    for (int i = 0; i < frequencies.size(); i++)
     {
-        frequencies[ i ].first  = i;
-        frequencies[ i ].second = 0;
+        frequencies[i].first  = i;
+        frequencies[i].second = 0;
     }
 
     while (in_f)
     {
         in_f.read ( buffer, buffsize );
-        for ( int i = 0; i < in_f.gcount(); i++ )
+        for (int i = 0; i < in_f.gcount(); i++)
         {
-            int index = ( buffer[ i ] >= 0 ? buffer[ i ] : buffer[ i ] + 256 );
-            frequencies[ index ].second += 1;
+            int index = (buffer[i] >= 0 ? buffer[i] : buffer[i] + 256);
+            frequencies[index].second += 1;
         }
     }
 
     in_f.close();
 
     //sort by frequency
-    for ( int i = 0; i < 256; i++ )
+    for ( int i = 0; i < frequencies.size(); i++ )
     {
-        int temp_max = frequencies[ i ].second;
+        int temp_max = frequencies[i].second;
         int temp_max_index = i;
-        for ( int j = i + 1; j < 256; j++ )
+        for ( int j = i + 1; j < frequencies.size(); j++ )
         {
-            if ( frequencies[ j ].second > temp_max )
+            if ( frequencies[j].second > temp_max )
             {
-                temp_max = frequencies[ j ].second;
+                temp_max = frequencies[j].second;
                 temp_max_index = j;
             }
         }
-        std::pair <char, std::uint64_t> temp = frequencies[ i ];
-        frequencies[ i ] = frequencies[ temp_max_index];
-        frequencies[ temp_max_index ] = temp;
+        std::pair <char, std::uint64_t> temp = frequencies[i];
+        frequencies[i] = frequencies[temp_max_index];
+        frequencies[temp_max_index] = temp;
     }
 
-    //non zero frequencies
-    for ( int i = 0; i < 255; i++ )
+    // non zero frequencies
+    for (int i = 0; i < frequencies.size() && frequencies[i].second!=0; i++)
     {
-        if ( frequencies[i].second != 0 )
-        {
-            num_unique_chars++;
-        }
+        num_unique_chars++;
     }
 
-    if ( num_unique_chars == 0 )
+    if (num_unique_chars == 0)
     {
         std::cerr << "CODES: In file appears to be empty. Exiting" << std::endl;
         return 3;
     }
 
-    //fill unordered map
+    // fill unordered map
     std::unordered_map<char, std::pair<char, std::uint64_t>> huffman_map;
     {
         huffman_tree tree(frequencies);
         tree.fill_unordered_map(huffman_map);
     }
 
-    std::fstream out_f( out, std::ios::binary | std::ios::out);
-    if ( out_f.fail() )
+    std::fstream out_f(out, std::ios::binary | std::ios::out);
+    if (out_f.fail())
     {
         std::cerr << "CODES: Error opening " << out << std::endl;
         return 4;
@@ -126,9 +124,9 @@ int main ( int argc, char* argv[])
               << "|    ASCII    | Frequency |       HUFFMAN Code        | New Length (bits) |" << '\n'
               << "+-------------+-----------+---------------------------+-------------------+" << std::endl;
 
-    for ( int i = 0; i < 255; i++ )
+    for (int i = 0; i < frequencies.size(); i++)
     {
-        if  ( frequencies[ i ].second )
+        if  (frequencies[ i ].second != 0)
         {
 
             std::string code = to_binary( huffman_map[ frequencies[ i ].first ].second, huffman_map[ frequencies[ i ].first ].first  );
