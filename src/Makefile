@@ -12,7 +12,7 @@ SRCDIR     := ${CURDIR}
 IDIR       := ${CURDIR}/../include
 ODIR       := ${CURDIR}/../obj
 CXX        := g++
-CXXFLAGS   := -std=c++11 -O2 -I$(IDIR)
+CXXFLAGS   := -std=c++11 -O3 -I$(IDIR)
 
 TARGETS := huffman_encode huffman_decode huffman_codes
 
@@ -38,7 +38,7 @@ uninstall:
 remove:
 	rm -f $(TARGETS)
 
-clean:
+clean: remove
 	rm -f $(ODIR)/*.o
 
 $(OBJ): $(ODIR)/%.o : $(SRCDIR)/%.cpp $(DEPS)
