@@ -15,7 +15,7 @@ class huffman_tree
 {
     public:
         huffman_tree(const std::array<std::pair <char, std::uint64_t>,256> &);
-        void fill_unordered_map (std::unordered_map<char, std::pair<char, std::uint64_t>> & );
+        void fill_unordered_map (std::unordered_map<char, std::pair<std::uint8_t, std::uint64_t>> & );
     private:
        //pointers to its children, left and right
        //the frequency of occurance of it and its children
@@ -32,7 +32,7 @@ class huffman_tree
         huffman_tree    (const huffman_tree &);
         void   operator=(huffman_tree);
 
-        void recursive_fill (std::unordered_map<char, std::pair<char, std::uint64_t>> &, const huffman_tree::huffman_node *, std::uint8_t, std::uint64_t) const;
+        void recursive_fill (std::unordered_map<char, std::pair<std::uint8_t, std::uint64_t>> &, const huffman_tree::huffman_node *, std::uint8_t, std::uint64_t) const;
         std::unique_ptr<struct huffman_tree::huffman_node> root_node;
 };
 

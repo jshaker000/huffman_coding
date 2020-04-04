@@ -25,7 +25,7 @@
 #include "bit_writer.h"
 
 
-int main ( int argc, char* argv[])
+int main (int argc, char* argv[])
 {
 
     std::string in;
@@ -70,7 +70,7 @@ int main ( int argc, char* argv[])
     {
         frequencies[i].first  = i;
         frequencies[i].second = 0;
-    } 
+    }
 
     //do a first pass through the file counting frequencies
     while (in_f)
@@ -83,7 +83,7 @@ int main ( int argc, char* argv[])
         }
     }
 
-    //sort by frequency
+    // sort by frequency
     for (int i = 0; i < frequencies.size(); i++)
     {
         int temp_max = frequencies[i].second;
@@ -101,10 +101,10 @@ int main ( int argc, char* argv[])
         frequencies[temp_max_index] = temp;
     }
 
-    //number the non zero frequencies
+    // number the non zero frequencies
     int num_unique_chars = 0;
 
-    for ( int i = 0; i < frequencies.size() && frequencies[i].second != 0; i++)
+    for (int i = 0; i < frequencies.size() && frequencies[i].second != 0; i++)
     {
         num_unique_chars++;
     }
@@ -116,13 +116,13 @@ int main ( int argc, char* argv[])
     }
 
     // fill unordered map
-    std::unordered_map< char, std::pair<char, std::uint64_t> > huffman_map;
+    std::unordered_map<char, std::pair<std::uint8_t, std::uint64_t>> huffman_map;
     {
         huffman_tree tree(frequencies);
         tree.fill_unordered_map(huffman_map);
     }
 
-    std::fstream out_f( out, std::ios::binary | std::ios::out);
+    std::fstream out_f(out, std::ios::binary | std::ios::out);
     if (out_f.fail())
     {
         std::cerr << "ENCODE: Error opening " << out << std::endl;
@@ -130,20 +130,28 @@ int main ( int argc, char* argv[])
     }
 
     // write the number of symbol codes to the file
-    out_f.put(static_cast<char>((num_unique_chars >> 8) & 0xFF));
-    out_f.put(static_cast<char>((num_unique_chars >> 0) & 0xFF));
-    new_length_bits += 2;
+    out_f.put(static_cast<char>((num_unique_chars / 0x0100) % 0x0100));
+    out_f.put(static_cast<char>((num_unique_chars / 0x0001) % 0x0100));
+    new_length_bits += 2*8;
 
     // print symbol codes to the file
     // SYMBOL[1 byte]  LENGTH[1 byte]  CODE[8 bytes]
     for (int i = 0; i < num_unique_chars; i++)
     {
-       out_f.put(static_cast<char>(frequencies[i].first));
-       out_f.put(static_cast<char>(huffman_map[(frequencies[i].first)].first));
+        std::uint8_t  symbol     = frequencies[i].first;
+        std::uint8_t  symbol_len = huffman_map[(frequencies[i].first)].first;
+        std::uint64_t symbol_enc = huffman_map[(frequencies[i].first)].second;
+        out_f.put(static_cast<char>(symbol));
+        out_f.put(static_cast<char>(symbol_len));
 
-       for (int j = 0; j < 8; j++)
-            out_f.put(static_cast<char>((huffman_map[(frequencies[i].first)].second >> (8*(7-j))) & 0xFF));
-        new_length_bits += 10 * 8; // 10 bytes per symbol
+        int bytes_to_print = symbol_len%8 == 0 ? symbol_len/8 : symbol_len/8  + 1;
+        // print the symbol, LSBS first
+        for (int j = 0; j < bytes_to_print; j++)
+        {
+             out_f.put(static_cast<char>(symbol_enc % 0x0100));
+             symbol_enc /= 0x0100;
+        }
+        new_length_bits += 8*(1+1+bytes_to_print); // symbol, length, encoding
     }
 
     out_f.close();
@@ -157,20 +165,20 @@ int main ( int argc, char* argv[])
         while (in_f)
         {
             in_f.read (in_buffer, in_buffsize);
-            for ( int i = 0; i < in_f.gcount(); i++ )
+            for (int i = 0; i < in_f.gcount(); i++)
             {
                 b.add_bits(huffman_map[(in_buffer[i])].first, huffman_map[(in_buffer[i])].second);
                 new_length_bits += huffman_map[(in_buffer[i])].first;
                 old_length_bits += 8;
             }
         }
-        new_length_bits += 8; //tag byte
+        new_length_bits += 8; // tag byte
     }
 
     in_f.close();
 
-    std::cerr << "ENCODE: DEFALTION RATE: " << std::setprecision( 4 ) 
-              << static_cast<float>( 100 * new_length_bits ) / old_length_bits << '%' << std::endl;
+    std::cerr << "ENCODE: DEFALTION RATE: " << std::setprecision(4)
+              << static_cast<float>(100*new_length_bits)/old_length_bits << '%' << std::endl;
 
     return 0;
 

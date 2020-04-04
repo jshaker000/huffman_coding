@@ -1,6 +1,7 @@
 #ifndef ANCILLARY_FUNCTIONS
 #define ANCILLARY_FUNCTIONS
 
+#include <cstdint>
 #include <functional>
 #include <string>
 
@@ -26,10 +27,10 @@ namespace std
 }
 
 template <class T>
-std::string to_binary( T num, char bits )
+std::string to_binary(T num, std::uint8_t bits)
 {
     std::string s = "";
-    if ( bits == -1 )
+    if (bits == 0xFF)
     {
         while ( num != 0 )
         {
@@ -46,15 +47,15 @@ std::string to_binary( T num, char bits )
     {
         while ( bits )
         {
-            s = static_cast<char>( (num & 1 ) + 0x30 ) + s;
+            s = static_cast<char>( (num&1) + '0')+s;
             num /= 2;
             bits--;
         }
     }
-    return ( s );
+    return s;
 }
 
-std::string printable_ASCII ( unsigned char c )
+std::string printable_ASCII (unsigned char c)
 {
     switch ( c )
     {

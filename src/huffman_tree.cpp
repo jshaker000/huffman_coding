@@ -1,3 +1,5 @@
+#include <cstdlib>
+#include <iostream>
 #include <vector>
 
 #include "huffman_tree.h"
@@ -66,29 +68,32 @@ huffman_tree::huffman_tree(const std::array<std::pair <char, std::uint64_t>,256>
     root_node = std::move(node_list[0]);
 }
 
-void huffman_tree::fill_unordered_map(std::unordered_map<char, std::pair<char, std::uint64_t>> & map)
+void huffman_tree::fill_unordered_map(std::unordered_map<char, std::pair<std::uint8_t, std::uint64_t>> & map)
 {
     recursive_fill(map, root_node.get(), 0, 0);
 }
 
 // finds all of the leaf nodes and inserts them, along with their symbol into an unordered map
 // symbol,  pair <length, code in binary>
-void huffman_tree::recursive_fill(std::unordered_map< char, std::pair<char, std::uint64_t> > & map,
+void huffman_tree::recursive_fill(std::unordered_map<char, std::pair<std::uint8_t, std::uint64_t>> & map,
                                   const huffman_tree::huffman_node* const root,
-                                  std::uint8_t length,
+                                  std::uint8_t  length,
                                   std::uint64_t huffman_code)
 const
 {
+    if (length > 64)
+    {
+        std::cerr << "Huffman Tree: Tree depths >= 64 are not currently supported" << std::endl;
+        std::exit(-1);
+    }
     if (root->left == nullptr && root->right == nullptr)
     {
-        std::pair<char, std::uint64_t> p (length, huffman_code);
-        map.emplace(root->data, p);
+        map.emplace(root->data, std::pair<std::uint8_t,std::uint64_t> (length, huffman_code));
         return;
     }
-
     else
     {
-        recursive_fill(map, root->left.get(),  length+1, (huffman_code<<1) + 0x00);
-        recursive_fill(map, root->right.get(), length+1, (huffman_code<<1) + 0x01);
+        recursive_fill(map, root->left.get(),  length+1, (huffman_code*2) + 0x00);
+        recursive_fill(map, root->right.get(), length+1, (huffman_code*2) + 0x01);
     }
 }
