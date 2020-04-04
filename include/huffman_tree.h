@@ -25,6 +25,11 @@ class huffman_tree
             int frequency = 0;
             char data = 0;
         };
+
+        //prohibit copy constructor
+        huffman_tree    (const huffman_tree &);
+        void   operator=(huffman_tree);
+
         void recursive_fill (std::unordered_map<char, std::pair<char, std::uint64_t>> &, const huffman_tree::huffman_node *, std::uint8_t, std::uint64_t) const;
         std::unique_ptr<struct huffman_tree::huffman_node> root_node;
 };
