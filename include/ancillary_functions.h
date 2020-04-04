@@ -4,9 +4,9 @@
 #include <functional>
 #include <string>
 
-//define hashing pairs so we can use them as keys for unordered maps
-//copied from boost library
-namespace std 
+// define hashing pairs so we can use them as keys for unordered maps
+// copied from boost library
+namespace std
 {
     template<typename T1, typename T2>
     struct hash<std::pair<T1, T2>> 
@@ -15,11 +15,10 @@ namespace std
         std::size_t seed1(0);
         seed1 ^= std::hash<T1>{}( p.first ) + 0x9e3779b9 
                + (p.second<<6) + (p.second>>1);
-    
+
         std::size_t seed2(0);
         seed2 ^= std::hash<T2>{}(p.second) + 0x9e3779b9 
                + (p.first<<6) + (p.first>>1);
-
 
       return (seed1 ^ seed2);
     }
@@ -31,7 +30,7 @@ std::string to_binary( T num, char bits )
 {
     std::string s = "";
     if ( bits == -1 )
-    {    
+    {
         while ( num != 0 )
         {
             s = (char)( (num&1) + 0x30 ) + s;
@@ -41,7 +40,7 @@ std::string to_binary( T num, char bits )
         while ( s.length() % 8 != 0 || s.length() == 0 )
         {
             s = "0" + s;
-        } 
+        }
     }
     else
     {
@@ -51,7 +50,7 @@ std::string to_binary( T num, char bits )
             num /= 2;
             bits--;
         }
-    } 
+    }
     return ( s );
 }
 

@@ -35,13 +35,13 @@ int main ( int argc, char* argv[])
     {
         std::cerr << "ENCODE: Input must currently be from a file :(" << std::endl;
         return 1;
-        //in = "/dev/stdin";
-        //out = ( argc == 1 ? "/dev/stdout" : argv[ 1 ] );
+        // in = "/dev/stdin";
+        // out = ( argc == 1 ? "/dev/stdout" : argv[ 1 ] );
     }
 
-    else if ( argc == 2 || argc == 3 )
+    else if (argc == 2 || argc == 3)
     {
-        in  =   argv[ 1 ];
+        in  =   argv[1];
         out = ( argc == 2 ? "/dev/stdout" : argv[ 2 ] );
     }
     else
@@ -50,16 +50,16 @@ int main ( int argc, char* argv[])
         return 1;
     }
 
-    std::fstream in_f( in, std::ios::binary | std::ios::in );
+    std::fstream in_f(in, std::ios::binary | std::ios::in);
 
-    if ( in_f.fail() )
+    if (in_f.fail())
     {
         std::cerr << "ENCODE: Error opening " << in << std::endl;
         return 2;
     }
 
     constexpr int in_buffsize = 256*1024;
-    char in_buffer[ in_buffsize ];
+    char in_buffer[in_buffsize];
 
     //stores ASCII_CODE, FREQUENCY
     std::array<std::pair <char, std::uint64_t>,256> frequencies;
@@ -78,7 +78,7 @@ int main ( int argc, char* argv[])
         in_f.read (in_buffer, in_buffsize);
         for (int i = 0; i < in_f.gcount(); i++)
         {
-            int index = ( in_buffer[i] >= 0 ? in_buffer[i] : in_buffer[i] + 256 );
+            int index = in_buffer[i] >= 0 ? in_buffer[i] : in_buffer[i] + 256;
             frequencies[index].second += 1;
         }
     }

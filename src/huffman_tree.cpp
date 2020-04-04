@@ -38,16 +38,16 @@ huffman_tree::huffman_tree(const std::array<std::pair <char, std::uint64_t>,256>
     while ( node_list.size() != 1 )
     {
         std::unique_ptr<struct huffman_tree::huffman_node> inner_node( new huffman_tree::huffman_node );
-        
+
         inner_node->left  = std::move( node_list[ position ] );
         inner_node->right = std::move( node_list[ position - 1 ] );
         inner_node->frequency = inner_node->right->frequency + inner_node->left->frequency;
 
         node_list.pop_back();
 
-        //std::cerr << "current position: " << position << '\n'
-        //          << '\t' << inner_node->left->data << ":" << inner_node->left->frequency
-        //          << "+" << inner_node->right->data << ":" << inner_node->right->frequency << " = " << inner_node->frequency << std::endl;
+        //  std::cerr << "current position: " << position << '\n'
+        //            << '\t' << inner_node->left->data << ":" << inner_node->left->frequency
+        //            << "+" << inner_node->right->data << ":" << inner_node->right->frequency << " = " << inner_node->frequency << std::endl;
         for ( int i = 0; i < position; i++ )
         {
             if ( node_list[i] == NULL || inner_node->frequency > node_list[i]->frequency )
@@ -63,9 +63,7 @@ huffman_tree::huffman_tree(const std::array<std::pair <char, std::uint64_t>,256>
         }
         position--;
     }
-
-    root_node = std::move( node_list[ 0 ] );
- 
+    root_node = std::move(node_list[0]);
 }
 
 void huffman_tree::fill_unordered_map(std::unordered_map<char, std::pair<char, std::uint64_t>> & map)
@@ -95,4 +93,3 @@ const
     }
 
 }
-

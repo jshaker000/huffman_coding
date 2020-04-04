@@ -33,16 +33,16 @@ int main ( int argc, char* argv[])
     std::string in;
     std::string out;
 
-    if( isatty( STDIN_FILENO ) == 0 )
+    if( isatty(STDIN_FILENO) == 0 )
     {
         in = "/dev/stdin";
-        out = ( argc == 1 ? "/dev/stdout" : argv[ 1 ] );
+        out = argc == 1 ? "/dev/stdout" : argv[1];
     }
 
-    else if ( argc == 2 || argc == 3 )
+    else if (argc == 2 || argc == 3)
     {
-        in  =   argv[ 1 ];
-        out = ( argc == 2 ? "/dev/stdout" : argv[ 2 ] );
+        in  = argv[ 1 ];
+        out = argc == 2 ? "/dev/stdout" : argv[2];
     }
     else
     {
@@ -50,7 +50,7 @@ int main ( int argc, char* argv[])
         return 1;
     }
 
-    std::fstream in_f( in, std::ios::binary | std::ios::in );
+    std::fstream in_f(in, std::ios::binary | std::ios::in);
 
     if ( in_f.fail() )
     {
@@ -59,7 +59,7 @@ int main ( int argc, char* argv[])
     }
 
     constexpr int in_buffsize  = 256*1024;
-    char in_buffer[ in_buffsize ] = {}; 
+    char in_buffer[in_buffsize] = {}; 
     std::unordered_map< std::pair<char, std::uint64_t>, char > huffman_map;
 
     //read in the number of symbols
@@ -73,42 +73,42 @@ int main ( int argc, char* argv[])
 
     //iterate through each symbol table in header and build the unordered map
     //pair <length, code( binary )>, ASCII SYMBOL
-    for ( int i = 0; i < num_codes; i++ )
+    for (int i = 0; i < num_codes; i++)
     {
         char value = {};
         char length = {};
-        char byte_code_buff [ 8 ] = {};
+        char byte_code_buff [8] = {};
         std::uint64_t byte_code   = {};
 
         in_f.get(value);
         in_f.get(length);
 
-        in_f.read(byte_code_buff, 8 );
+        in_f.read(byte_code_buff, 8);
 
         if (!IS_BIG_ENDIAN)  //little endian, invert symbol order so conversion to std::uint64_t is correct
         {
             for ( int i = 0; i < 3; i++ )
             {
                 char temp = byte_code_buff[i];
-                byte_code_buff[ i ] = byte_code_buff[8 - 1 - i];
+                byte_code_buff[i] = byte_code_buff[8 - 1 - i];
                 byte_code_buff[8 - 1 - i] = temp;
             }
         }
 
         //turn array of chars into a std::uint64_t
-        byte_code = reinterpret_cast<std::uint64_t *>( byte_code_buff  )[ 0 ];
+        byte_code = reinterpret_cast<std::uint64_t *>(byte_code_buff)[0];
 
         std::pair < char, std::uint64_t > p( length, byte_code );
 
-        if ( !huffman_map.emplace( p, value ).second )
+        if (!huffman_map.emplace(p, value).second)
         {
             std::cerr << "DECODE: key collision building hashtable. error" << std::endl;
             return 3;
         }
     }
 
-    std::fstream out_f( out, std::ios::binary | std::ios::out);
-    if ( out_f.fail() )
+    std::fstream out_f(out, std::ios::binary | std::ios::out);
+    if (out_f.fail())
     {
         std::cerr << "DECODE: Error opening " << out << std::endl;
         return 4;
@@ -122,40 +122,40 @@ int main ( int argc, char* argv[])
     //writing to a file
     while (in_f)
     {
-        in_f.read ( in_buffer, in_buffsize );
+        in_f.read (in_buffer, in_buffsize);
         //loop all bytes read except for the last 2 iff they are the last 2 in the file
-        for ( int i = 0; ( in_f && i < in_f.gcount() ) || ( !in_f && i < in_f.gcount() - 2 ); i++ )
+        for (int i = 0; (in_f && i < in_f.gcount()) || (!in_f && i < in_f.gcount() - 2 ); i++)
         {
             for ( int j = 0; j < 8; j++ )
             {
                 key.first  +=  1;
-                key.second <<= 1; 
-                key.second += ( ( in_buffer[ i ] >> ( 7 - j ) ) & 1 );
+                key.second <<= 1;
+                key.second += ((in_buffer[i] >> (7-j)) & 1);
 
-                found = huffman_map.find( key );
+                found = huffman_map.find(key);
 
-                if ( ( found != huffman_map.end() ) )
+                if ((found != huffman_map.end()))
                 {
-                    out_f.put( found->second );
+                    out_f.put(found->second);
                     key.first  = 0;
                     key.second = 0;
                 }
             }
         }
         //read in only as many bits from the second to last byte as stated in the last byte
-        if ( !in_f )
+        if (!in_f)
         {
-            for ( int j = 0; j < in_buffer[ in_f.gcount() - 1 ]; j++ )
+            for ( int j = 0; j < in_buffer[in_f.gcount() - 1]; j++ )
             {
                 key.first  +=  1;
                 key.second <<= 1; 
-                key.second += ( ( in_buffer[ in_f.gcount() - 2 ] >> ( 7 - j ) ) & 1 );
+                key.second += ((in_buffer[in_f.gcount()-2] >> (7-j)) & 1);
 
-                found = huffman_map.find( key );
+                found = huffman_map.find(key);
 
                 if ((found != huffman_map.end()))
                 {
-                    out_f.put( found->second );
+                    out_f.put(found->second);
                     key.first  = 0;
                     key.second = 0;
                 }

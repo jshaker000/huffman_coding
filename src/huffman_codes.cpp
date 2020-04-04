@@ -15,22 +15,22 @@
 #include "huffman_tree.h"
 #include "ancillary_functions.h"
 
-int main ( int argc, char* argv[])
+int main (int argc, char* argv[])
 {
 
     std::string in;
     std::string out;
 
-    if( isatty( STDIN_FILENO ) == 0 )
+    if( isatty(STDIN_FILENO) == 0 )
     {
         in = "/dev/stdin";
-        out = ( argc == 1 ? "/dev/stdout" : argv[ 1 ] );
+        out = argc == 1 ? "/dev/stdout" : argv[1];
     }
 
-    else if ( argc == 2 || argc == 3 )
+    else if (argc == 2 || argc == 3)
     {
-        in  =   argv[ 1 ];
-        out = ( argc == 2 ? "/dev/stdout" : argv[ 2 ] );
+        in  =   argv[1];
+        out = argc == 2 ? "/dev/stdout" : argv[2];
     }
     else
     {
@@ -38,7 +38,7 @@ int main ( int argc, char* argv[])
         return 1;
     }
 
-    std::fstream in_f( in, std::ios::binary | std::ios::in );
+    std::fstream in_f(in, std::ios::binary | std::ios::in);
 
     if ( in_f.fail() )
     {
@@ -66,7 +66,7 @@ int main ( int argc, char* argv[])
         in_f.read ( buffer, buffsize );
         for (int i = 0; i < in_f.gcount(); i++)
         {
-            int index = (buffer[i] >= 0 ? buffer[i] : buffer[i] + 256);
+            int index = buffer[i] >= 0 ? buffer[i] : buffer[i] + 256;
             frequencies[index].second += 1;
         }
     }
@@ -128,17 +128,15 @@ int main ( int argc, char* argv[])
     {
         if  (frequencies[ i ].second != 0)
         {
+            std::string code = to_binary( huffman_map[frequencies[i].first].second, huffman_map[frequencies[i].first].first  );
 
-            std::string code = to_binary( huffman_map[ frequencies[ i ].first ].second, huffman_map[ frequencies[ i ].first ].first  );
-
-            out_f     << "| " << std::setw(10) << printable_ASCII( frequencies[ i ].first ) << "  | " 
-                      << std::setw(9)  << frequencies[ i ].second << " | " 
+            out_f     << "| " << std::setw(10) << printable_ASCII(frequencies[i].first) << "  | "
+                      << std::setw(9)  << frequencies[ i ].second << " | "
                       << std::setw(25) << code << " | "
                       << std::setw(17) << code.length() << " |" << std::endl;
 
-            old_length_bits += 8 * frequencies[ i ].second ;
-            new_length_bits += code.length() * frequencies[ i ].second ;
-
+            old_length_bits += 8 * frequencies[i].second ;
+            new_length_bits += code.length() * frequencies[i].second;
         }
     }
 

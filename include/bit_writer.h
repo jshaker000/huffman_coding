@@ -8,7 +8,7 @@
 class bit_writer
 {
     public:
-        bit_writer(std::string);
+        bit_writer(const std::string &);
         ~bit_writer();
         void add_bits (char, std::uint64_t);
     private:
