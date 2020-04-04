@@ -10,7 +10,7 @@
 // ENDOCDED DATA
 //
 // LAST BYTE HOLDS A TAG 1 - 8, saying how many bits of the second to last byte is encoded data 
-    //vs a pad
+    // vs a pad
 
 #include <cstdint>
 #include <iostream>
@@ -25,7 +25,7 @@
 
 #include "ancillary_functions.h"
 
-const bool IS_BIG_ENDIAN = ( htonl(47) == 47 );
+static const bool IS_BIG_ENDIAN = htonl(47) == 47;
 
 int main ( int argc, char* argv[])
 {
@@ -62,7 +62,7 @@ int main ( int argc, char* argv[])
     char in_buffer[in_buffsize] = {}; 
     std::unordered_map< std::pair<char, std::uint64_t>, char > huffman_map;
 
-    //read in the number of symbols
+    // read in the number of symbols
     int num_codes;
     {
         char byte_0, byte_1;
@@ -71,8 +71,8 @@ int main ( int argc, char* argv[])
         num_codes = (static_cast<unsigned int>(byte_0) << 8) + static_cast<unsigned int>(byte_1);
     }
 
-    //iterate through each symbol table in header and build the unordered map
-    //pair <length, code( binary )>, ASCII SYMBOL
+    // iterate through each symbol table in header and build the unordered map
+    // pair <length, code( binary )>, ASCII SYMBOL
     for (int i = 0; i < num_codes; i++)
     {
         char value = {};
@@ -85,7 +85,7 @@ int main ( int argc, char* argv[])
 
         in_f.read(byte_code_buff, 8);
 
-        if (!IS_BIG_ENDIAN)  //little endian, invert symbol order so conversion to std::uint64_t is correct
+        if (!IS_BIG_ENDIAN)  // little endian, invert symbol order so conversion to std::uint64_t is correct
         {
             for ( int i = 0; i < 3; i++ )
             {
@@ -95,10 +95,10 @@ int main ( int argc, char* argv[])
             }
         }
 
-        //turn array of chars into a std::uint64_t
+        // turn array of chars into a std::uint64_t
         byte_code = reinterpret_cast<std::uint64_t *>(byte_code_buff)[0];
 
-        std::pair < char, std::uint64_t > p( length, byte_code );
+        std::pair <char, std::uint64_t> p( length, byte_code );
 
         if (!huffman_map.emplace(p, value).second)
         {
@@ -117,16 +117,16 @@ int main ( int argc, char* argv[])
     std::pair <char, std::uint64_t> key(0,0);
     std::unordered_map<std::pair<char, std::uint64_t>, char>::const_iterator found;
 
-    //extract the next bit into 'current code'
-    //appropriately checking the <length, binary code> pair until it matches a symbol in the map, then
-    //writing to a file
+    // extract the next bit into 'current code'
+    // appropriately checking the <length, binary code> pair until it matches a symbol in the map, then
+    // writing to a file
     while (in_f)
     {
         in_f.read (in_buffer, in_buffsize);
-        //loop all bytes read except for the last 2 iff they are the last 2 in the file
+        // loop all bytes read except for the last 2 iff they are the last 2 in the file
         for (int i = 0; (in_f && i < in_f.gcount()) || (!in_f && i < in_f.gcount() - 2 ); i++)
         {
-            for ( int j = 0; j < 8; j++ )
+            for (int j = 0; j < 8; j++)
             {
                 key.first  +=  1;
                 key.second <<= 1;
@@ -142,7 +142,7 @@ int main ( int argc, char* argv[])
                 }
             }
         }
-        //read in only as many bits from the second to last byte as stated in the last byte
+        // read in only as many bits from the second to last byte as stated in the last byte
         if (!in_f)
         {
             for ( int j = 0; j < in_buffer[in_f.gcount() - 1]; j++ )
@@ -162,6 +162,5 @@ int main ( int argc, char* argv[])
             }
         }
     }
-
     return 0;
 }
