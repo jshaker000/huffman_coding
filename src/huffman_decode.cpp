@@ -1,17 +1,18 @@
-//FILE FORMAT
+// FILE FORMAT
 //
-//2 BYTES - NUM DISTINCT SYMBOLS ENCODED
+// 2 BYTES - NUM DISTINCT SYMBOLS ENCODED
 //
-//FOR EACH SYMBOL:
-    //1 BYTE  - THE SYMBOL
-    //1 BYTE  - LENGTH OF THE HUFFMAN ENCODED SYMBOL IN BITS
-    //8 BYTES - THE HUFFMAN CODE
+// FOR EACH SYMBOL:
+    // 1 BYTE  - THE SYMBOL
+    // 1 BYTE  - LENGTH OF THE HUFFMAN ENCODED SYMBOL IN BITS
+    // 8 BYTES - THE HUFFMAN CODE
 //
-//ENDOCDED DATA
+// ENDOCDED DATA
 //
-//LAST BYTE HOLDS A TAG 1 - 8, saying how many bits of the second to last byte is encoded data 
+// LAST BYTE HOLDS A TAG 1 - 8, saying how many bits of the second to last byte is encoded data 
     //vs a pad
 
+#include <cstdint>
 #include <iostream>
 #include <fstream>
 #include <memory>
@@ -48,7 +49,7 @@ int main ( int argc, char* argv[])
         std::cerr << "DECODE: Synatx: huffman_decode <infile> <outfile>" << std::endl;
         return 1;
     }
-    
+
     std::fstream in_f( in, std::ios::binary | std::ios::in );
 
     if ( in_f.fail() )
@@ -59,7 +60,7 @@ int main ( int argc, char* argv[])
 
     constexpr int in_buffsize  = 256*1024;
     char in_buffer[ in_buffsize ] = {}; 
-    std::unordered_map< std::pair<char, long long int>, char > huffman_map;
+    std::unordered_map< std::pair<char, std::uint64_t>, char > huffman_map;
 
     //read in the number of symbols
     int num_codes;
@@ -67,7 +68,7 @@ int main ( int argc, char* argv[])
         char byte_0, byte_1;
         in_f.get(byte_0);
         in_f.get(byte_1);
-        num_codes = ( static_cast<unsigned int>( byte_0 ) << 8 ) + static_cast<unsigned int>( byte_1 );
+        num_codes = (static_cast<unsigned int>(byte_0) << 8) + static_cast<unsigned int>(byte_1);
     }
 
     //iterate through each symbol table in header and build the unordered map
@@ -77,27 +78,27 @@ int main ( int argc, char* argv[])
         char value = {};
         char length = {};
         char byte_code_buff [ 8 ] = {};
-        long long int byte_code   = {};
-        
+        std::uint64_t byte_code   = {};
+
         in_f.get(value);
         in_f.get(length);
 
         in_f.read(byte_code_buff, 8 );
-        
-        if ( !IS_BIG_ENDIAN )  //little endian, invert symbol order so conversion to long long int is correct
+
+        if (!IS_BIG_ENDIAN)  //little endian, invert symbol order so conversion to std::uint64_t is correct
         {
             for ( int i = 0; i < 3; i++ )
             {
-                char temp = byte_code_buff[ i ];
-                byte_code_buff[ i ] = byte_code_buff[ 8 - 1 - i ];
-                byte_code_buff[ 8 - 1 - i ] = temp;
+                char temp = byte_code_buff[i];
+                byte_code_buff[ i ] = byte_code_buff[8 - 1 - i];
+                byte_code_buff[8 - 1 - i] = temp;
             }
         }
-        
-        //turn array of chars into a long long int
-        byte_code = reinterpret_cast<long long int *>( byte_code_buff  )[ 0 ];
 
-        std::pair < char, long long int > p( length, byte_code );
+        //turn array of chars into a std::uint64_t
+        byte_code = reinterpret_cast<std::uint64_t *>( byte_code_buff  )[ 0 ];
+
+        std::pair < char, std::uint64_t > p( length, byte_code );
 
         if ( !huffman_map.emplace( p, value ).second )
         {
@@ -113,13 +114,13 @@ int main ( int argc, char* argv[])
         return 4;
     }
 
-    std::pair < char, long long int > key( 0,0 );
-    std::unordered_map< std::pair<char, long long int>, char >::const_iterator found;
-   
+    std::pair <char, std::uint64_t> key(0,0);
+    std::unordered_map<std::pair<char, std::uint64_t>, char>::const_iterator found;
+
     //extract the next bit into 'current code'
     //appropriately checking the <length, binary code> pair until it matches a symbol in the map, then
     //writing to a file
-    while ( in_f )
+    while (in_f)
     {
         in_f.read ( in_buffer, in_buffsize );
         //loop all bytes read except for the last 2 iff they are the last 2 in the file
@@ -132,7 +133,7 @@ int main ( int argc, char* argv[])
                 key.second += ( ( in_buffer[ i ] >> ( 7 - j ) ) & 1 );
 
                 found = huffman_map.find( key );
-                
+
                 if ( ( found != huffman_map.end() ) )
                 {
                     out_f.put( found->second );
@@ -151,8 +152,8 @@ int main ( int argc, char* argv[])
                 key.second += ( ( in_buffer[ in_f.gcount() - 2 ] >> ( 7 - j ) ) & 1 );
 
                 found = huffman_map.find( key );
-                    
-                if ( ( found != huffman_map.end() ) )
+
+                if ((found != huffman_map.end()))
                 {
                     out_f.put( found->second );
                     key.first  = 0;
@@ -163,5 +164,4 @@ int main ( int argc, char* argv[])
     }
 
     return 0;
-
 }

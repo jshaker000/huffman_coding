@@ -1,5 +1,6 @@
 //prints the huffman codes of a file in a nicely formatted table
 
+#include <cstdint>
 #include <iostream>
 #include <iomanip>
 #include <fstream>
@@ -35,7 +36,7 @@ int main ( int argc, char* argv[])
         std::cerr << "CODES: Synatx: huffman_codes <in file> <outfile>" << std::endl;
         return 1;
     }
-    
+
     std::fstream in_f( in, std::ios::binary | std::ios::in );
 
     if ( in_f.fail() )
@@ -46,21 +47,20 @@ int main ( int argc, char* argv[])
 
     constexpr int buffsize = 256*1024;
     char buffer[ buffsize ];
-    
-    std::pair <char, long long int> frequencies [ 256 ];
-    
-    long long int old_length_bits = 0;
-    long long int new_length_bits = 0;
+
+    std::pair <char, std::uint64_t> frequencies [ 256 ];
+
+    std::uint64_t old_length_bits = 0;
+    std::uint64_t new_length_bits = 0;
     int num_unique_chars = 0;
 
     for ( int i = 0; i < 256; i++ )
     {
         frequencies[ i ].first  = i;
         frequencies[ i ].second = 0;
-    } 
+    }
 
-
-    while ( in_f )
+    while (in_f)
     {
         in_f.read ( buffer, buffsize );
         for ( int i = 0; i < in_f.gcount(); i++ )
@@ -85,7 +85,7 @@ int main ( int argc, char* argv[])
                 temp_max_index = j;
             }
         }
-        std::pair <char, long long int> temp = frequencies[ i ];
+        std::pair <char, std::uint64_t> temp = frequencies[ i ];
         frequencies[ i ] = frequencies[ temp_max_index];
         frequencies[ temp_max_index ] = temp;
     }
@@ -93,7 +93,7 @@ int main ( int argc, char* argv[])
     //non zero frequencies
     for ( int i = 0; i < 255; i++ )
     {
-        if ( frequencies[ i ].second != 0 )
+        if ( frequencies[i].second != 0 )
         {
             num_unique_chars++;
         }
@@ -106,13 +106,12 @@ int main ( int argc, char* argv[])
     }
 
     //fill unordered map
-    std::unordered_map< char, std::pair<char, long long int> > huffman_map;
-
+    std::unordered_map<char, std::pair<char, std::uint64_t>> huffman_map;
     {
-        huffman_tree tree( frequencies );
-        tree.fill_unordered_map( huffman_map );
+        huffman_tree tree(frequencies);
+        tree.fill_unordered_map(huffman_map);
     }
-    
+
     std::fstream out_f( out, std::ios::binary | std::ios::out);
     if ( out_f.fail() )
     {

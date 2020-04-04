@@ -12,6 +12,7 @@
 //LAST BYTE HOLDS A TAG 1 - 8, saying how many bits of the second to last byte is encoded data 
     //vs a pad
 
+#include <cstdint>
 #include <iostream>
 #include <iomanip>
 #include <fstream>
@@ -60,11 +61,11 @@ int main ( int argc, char* argv[])
 
     constexpr int in_buffsize = 256*1024;
     char in_buffer[ in_buffsize ];
-    
+
     //stores ASCII_CODE, FREQUENCY
-    std::pair <char, long long int> frequencies [ 256 ];
-    long long int old_length_bits = 0;
-    long long int new_length_bits = 0;
+    std::pair <char, std::uint64_t> frequencies [ 256 ];
+    std::uint64_t old_length_bits = 0;
+    std::uint64_t new_length_bits = 0;
 
     for ( int i = 0; i < 256; i++ )
     {
@@ -96,14 +97,14 @@ int main ( int argc, char* argv[])
                 temp_max_index = j;
             }
         }
-        std::pair <char, long long int> temp = frequencies[ i ];
+        std::pair <char, std::uint64_t> temp = frequencies[ i ];
         frequencies[ i ] = frequencies[ temp_max_index];
         frequencies[ temp_max_index ] = temp;
     }
-    
+
     //number the non zero frequencies
     int num_unique_chars = 0;
-    
+
     for ( int i = 0; i < 256 && frequencies[ i ].second; i++ )
     {
         num_unique_chars++;
@@ -114,9 +115,9 @@ int main ( int argc, char* argv[])
         std::cerr << "ENCODE: In file appears to be empty. Exiting" << std::endl;
         return 3;
     }
-    
+
     //fill unordered map
-    std::unordered_map< char, std::pair<char, long long int> > huffman_map;
+    std::unordered_map< char, std::pair<char, std::uint64_t> > huffman_map;
     {
         huffman_tree tree( frequencies );
         tree.fill_unordered_map( huffman_map );
