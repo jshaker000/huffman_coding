@@ -5,6 +5,7 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -47,7 +48,7 @@ int main (int argc, char* argv[])
     }
 
     constexpr int buffsize = 256*1024;
-    char buffer[ buffsize ];
+    std::unique_ptr<char[]> buffer(new char[buffsize]);
 
     std::array<std::pair <char, std::uint64_t>,256> frequencies;
 
@@ -63,18 +64,17 @@ int main (int argc, char* argv[])
 
     while (in_f)
     {
-        in_f.read ( buffer, buffsize );
+        in_f.read (buffer.get(), buffsize);
         for (int i = 0; i < in_f.gcount(); i++)
         {
-            int index = buffer[i] >= 0 ? buffer[i] : buffer[i] + 256;
+            int index = buffer.get()[i] >= 0 ? buffer.get()[i] : buffer.get()[i] + 0x0100;
             frequencies[index].second += 1;
         }
     }
-
     in_f.close();
 
     //sort by frequency
-    for ( int i = 0; i < frequencies.size(); i++ )
+    for (int i = 0; i < frequencies.size(); i++)
     {
         int temp_max = frequencies[i].second;
         int temp_max_index = i;

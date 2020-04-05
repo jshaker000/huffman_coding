@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <fstream>
+#include <memory>
 #include <string>
 
 // takes in a file name and appends to it bits.
@@ -15,7 +16,7 @@ class bit_writer
         void add_bits (std::uint8_t, std::uint64_t);
     private:
         static constexpr std::uint64_t buff_size = 256*1024;
-        char buffer[buff_size] = {};
+        std::unique_ptr<char[]> buffer           = nullptr;
         std::uint64_t current_bits = 0;
         std::fstream out_f;
 };

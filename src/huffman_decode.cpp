@@ -56,7 +56,7 @@ int main (int argc, char* argv[])
     }
 
     constexpr int in_buffsize  = 256*1024;
-    char in_buffer[in_buffsize] = {}; 
+    std::unique_ptr<char[]> in_buffer(new char[in_buffsize]);
     std::unordered_map<std::pair<std::uint8_t, std::uint64_t>, char> huffman_map;
 
     // read in the number of symbols
@@ -111,7 +111,7 @@ int main (int argc, char* argv[])
     // writing to a file
     while (in_f)
     {
-        in_f.read (in_buffer, in_buffsize);
+        in_f.read (in_buffer.get(), in_buffsize);
         // loop all bytes read except for the last 2 iff they are the last 2 in the file
         for (int i = 0; (in_f && i < in_f.gcount()) || (!in_f && i < in_f.gcount() - 2); i++)
         {
@@ -120,7 +120,7 @@ int main (int argc, char* argv[])
             {
                 key.first  += 1;
                 key.second *= 2;
-                key.second += ((static_cast<uint8_t>(in_buffer[i]) / pow2) & 0x01);
+                key.second += ((static_cast<uint8_t>(in_buffer.get()[i]) / pow2) & 0x01);
                 found = huffman_map.find(key);
                 if ((found != huffman_map.end()))
                 {
@@ -135,11 +135,11 @@ int main (int argc, char* argv[])
         if (!in_f)
         {
             std::uint8_t pow2 = 0x0080;
-            for (int j = 0; j < in_buffer[in_f.gcount() - 1]; j++)
+            for (int j = 0; j < in_buffer.get()[in_f.gcount() - 1]; j++)
             {
                 key.first  += 1;
                 key.second *= 2; 
-                key.second += ((static_cast<uint8_t>(in_buffer[in_f.gcount()-2]) / pow2) & 0x01);
+                key.second += ((static_cast<uint8_t>(in_buffer.get()[in_f.gcount()-2]) / pow2) & 0x01);
 
                 found = huffman_map.find(key);
 

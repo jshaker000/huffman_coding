@@ -1,7 +1,14 @@
 #include "bit_writer.h"
 
+#include <cmath>
+
 bit_writer::bit_writer (const std::string &out)
 {
+    buffer = std::move(std::unique_ptr<char[]>(new char[buff_size]));
+    for (int i = 0; i < buff_size; i++ )
+    {
+        buffer.get()[i] = 0;
+    }
     out_f.open(out, std::ios::binary | std::ios::app);
 }
 
@@ -10,9 +17,9 @@ bit_writer::bit_writer (const std::string &out)
 // and close file
 bit_writer::~bit_writer()
 {
-    if ( current_bits !=0 )
-        out_f.write(buffer, (current_bits + 8 - ((current_bits - 1) % 8)) >> 3);
-    out_f.put(static_cast<char>((current_bits % 8) ? (current_bits % 8) : (8)));
+    if (current_bits !=0)
+        out_f.write(buffer.get(), (current_bits + 8 - ((current_bits - 1) % 8)) / 8);
+    out_f.put(static_cast<char>(current_bits%8 ? current_bits%8 : 8));
     out_f.close();
 }
 
@@ -23,10 +30,10 @@ void bit_writer::add_bits(std::uint8_t bits_to_add, std::uint64_t bits)
     int index_to_add = current_bits / 8;
     int slot_to_add  = current_bits % 8;
 
-    while (bits_to_add > 0)
+    while (bits_to_add != 0)
     {
-        buffer[index_to_add] |= (bits & (1<<(bits_to_add - 1))) >>  (bits_to_add - 1)
-                               << (7 - slot_to_add);
+        buffer.get()[index_to_add] |= (bits & (1<<(bits_to_add - 1))) >> (bits_to_add - 1)
+                                      << (7 - slot_to_add);
         slot_to_add++;
 
         if ( slot_to_add == 8 )
@@ -36,12 +43,12 @@ void bit_writer::add_bits(std::uint8_t bits_to_add, std::uint64_t bits)
 
             if (index_to_add == buff_size)
             {
-                out_f.write( buffer, buff_size );
-                index_to_add = 0;
+                out_f.write(buffer.get(), buff_size);
+                index_to_add =  0;
                 current_bits = -1;
-                for (int i = 0; i < buff_size; i++ )
+                for (int i = 0; i < buff_size; i++)
                 {
-                    buffer[i] = 0;
+                    buffer.get()[i] = 0;
                 }
             }
         }

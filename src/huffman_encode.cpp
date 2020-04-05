@@ -59,7 +59,7 @@ int main (int argc, char* argv[])
     }
 
     constexpr int in_buffsize = 256*1024;
-    char in_buffer[in_buffsize];
+    std::unique_ptr<char[]> in_buffer(new char [in_buffsize]);
 
     //stores ASCII_CODE, FREQUENCY
     std::array<std::pair <char, std::uint64_t>,256> frequencies;
@@ -75,10 +75,10 @@ int main (int argc, char* argv[])
     //do a first pass through the file counting frequencies
     while (in_f)
     {
-        in_f.read (in_buffer, in_buffsize);
+        in_f.read (in_buffer.get(), in_buffsize);
         for (int i = 0; i < in_f.gcount(); i++)
         {
-            int index = in_buffer[i] >= 0 ? in_buffer[i] : in_buffer[i] + 256;
+            int index = in_buffer.get()[i] >= 0 ? in_buffer.get()[i] : in_buffer.get()[i] + 0x0100;
             frequencies[index].second += 1;
         }
     }
@@ -164,11 +164,11 @@ int main (int argc, char* argv[])
         //bit writer queues to write until a multiple of 8 bits is recieved
         while (in_f)
         {
-            in_f.read (in_buffer, in_buffsize);
+            in_f.read (in_buffer.get(), in_buffsize);
             for (int i = 0; i < in_f.gcount(); i++)
             {
-                b.add_bits(huffman_map[(in_buffer[i])].first, huffman_map[(in_buffer[i])].second);
-                new_length_bits += huffman_map[(in_buffer[i])].first;
+                b.add_bits(huffman_map[(in_buffer.get()[i])].first, huffman_map[(in_buffer.get()[i])].second);
+                new_length_bits += huffman_map[(in_buffer.get()[i])].first;
                 old_length_bits += 8;
             }
         }
