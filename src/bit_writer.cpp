@@ -7,7 +7,7 @@ bit_writer::bit_writer (const std::string &out)
     buffer = std::move(std::unique_ptr<char[]>(new char[buff_size]));
     for (int i = 0; i < buff_size; i++ )
     {
-        buffer.get()[i] = 0;
+        buffer.get()[i] = '\0';
     }
     out_f.open(out, std::ios::binary | std::ios::app);
 }
@@ -18,8 +18,8 @@ bit_writer::bit_writer (const std::string &out)
 bit_writer::~bit_writer()
 {
     if (current_bits !=0)
-        out_f.write(buffer.get(), (current_bits + 8 - ((current_bits - 1) % 8)) / 8);
-    out_f.put(static_cast<char>(current_bits%8 ? current_bits%8 : 8));
+        out_f.write(buffer.get(), (current_bits/8) + (current_bits%8 != 0 ? 1 : 0));
+    out_f.put(static_cast<char>(current_bits%8 != 0 ? current_bits%8 : 8));
     out_f.close();
 }
 
@@ -48,7 +48,7 @@ void bit_writer::add_bits(std::uint8_t bits_to_add, std::uint64_t bits)
                 current_bits = -1;
                 for (int i = 0; i < buff_size; i++)
                 {
-                    buffer.get()[i] = 0;
+                    buffer.get()[i] = '\0';
                 }
             }
         }
