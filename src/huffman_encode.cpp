@@ -3,9 +3,9 @@
 // 2 BYTES - NUM DISTINCT SYMBOLS ENCODED
 //
 // FOR EACH SYMBOL:
-    //1 BYTE  - THE SYMBOL
-    //1 BYTE  - LENGTH OF THE HUFFMAN ENCODED SYMBOL IN BITS
-    //8 BYTES - THE HUFFMAN CODE
+    // 1 BYTE  - THE SYMBOL
+    // 1 BYTE  - LENGTH OF THE HUFFMAN ENCODED SYMBOL IN BITS
+    // N BYTES - THE HUFFMAN CODE (based on num bits. LSBS first)
 // ENDOCDED DATA
 // LAST BYTE HOLDS A TAG 1 - 8, saying how many bits of the second to last byte is encoded data
     // vs a pad
