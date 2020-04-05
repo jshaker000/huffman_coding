@@ -27,7 +27,7 @@
 static void update_key_write(std::uint8_t num_bits_to_read,
                              std::uint8_t byte_to_read,
                              std::pair<std::uint8_t,std::uint64_t> &key,
-                             std::unordered_map<std::pair<std::uint8_t, std::uint64_t>, char> &huffman_map,
+                             const std::unordered_map<std::pair<std::uint8_t, std::uint64_t>, char> &huffman_map,
                              char *out_buffer,
                              std::uint64_t out_buffsize,
                              std::uint64_t &out_buff_bytes,
