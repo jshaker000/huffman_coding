@@ -4,7 +4,7 @@
 
 bit_writer::bit_writer (const std::string &out)
 {
-    buffer = std::move(std::unique_ptr<char[]>(new char[buff_size]));
+    buffer = std::unique_ptr<char[]>(new char[buff_size]);
     buffer.get()[0] = '\0';
     out_f.open(out, std::ios::binary | std::ios::app);
 }
