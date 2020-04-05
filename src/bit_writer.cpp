@@ -5,10 +5,7 @@
 bit_writer::bit_writer (const std::string &out)
 {
     buffer = std::move(std::unique_ptr<char[]>(new char[buff_size]));
-    for (int i = 0; i < buff_size; i++ )
-    {
-        buffer.get()[i] = '\0';
-    }
+    buffer.get()[0] = '\0';
     out_f.open(out, std::ios::binary | std::ios::app);
 }
 
@@ -27,8 +24,8 @@ bit_writer::~bit_writer()
 // flush buffer when needed
 void bit_writer::add_bits(std::uint8_t bits_to_add, std::uint64_t bits)
 {
-    int index_to_add = current_bits / 8;
-    int slot_to_add  = current_bits % 8;
+    std::uint64_t index_to_add = current_bits >>    3;
+    std::uint8_t  slot_to_add  = current_bits &  0x07;
 
     while (bits_to_add != 0)
     {
@@ -36,21 +33,17 @@ void bit_writer::add_bits(std::uint8_t bits_to_add, std::uint64_t bits)
                                       << (7 - slot_to_add);
         slot_to_add++;
 
-        if ( slot_to_add == 8 )
+        if (slot_to_add == 8)
         {
             slot_to_add = 0;
             index_to_add++;
-
             if (index_to_add == buff_size)
             {
                 out_f.write(buffer.get(), buff_size);
                 index_to_add =  0;
                 current_bits = -1;
-                for (int i = 0; i < buff_size; i++)
-                {
-                    buffer.get()[i] = '\0';
-                }
             }
+            buffer.get()[index_to_add] = '\0';
         }
         current_bits++;
         bits_to_add--;

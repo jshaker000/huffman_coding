@@ -58,7 +58,7 @@ int main (int argc, char* argv[])
         return 2;
     }
 
-    constexpr int in_buffsize = 256*1024;
+    constexpr int in_buffsize = 1024*1024;
     std::unique_ptr<char[]> in_buffer(new char [in_buffsize]);
 
     //stores ASCII_CODE, FREQUENCY
@@ -130,8 +130,8 @@ int main (int argc, char* argv[])
     }
 
     // write the number of symbol codes to the file
-    out_f.put(static_cast<char>((num_unique_chars / 0x0100) % 0x0100));
-    out_f.put(static_cast<char>((num_unique_chars / 0x0001) % 0x0100));
+    out_f.put(static_cast<char>((num_unique_chars >> 8) & 0xFF));
+    out_f.put(static_cast<char>((num_unique_chars >> 0) & 0xFF));
     new_length_bits += 2*8;
 
     // print symbol codes to the file
@@ -148,8 +148,8 @@ int main (int argc, char* argv[])
         // print the symbol, LSBS first
         for (int j = 0; j < bytes_to_print; j++)
         {
-             out_f.put(static_cast<char>(symbol_enc % 0x0100));
-             symbol_enc /= 0x0100;
+             out_f.put(static_cast<char>(symbol_enc & 0xFF));
+             symbol_enc >>= 8;
         }
         new_length_bits += 8*(1+1+bytes_to_print); // symbol, length, encoding
     }
