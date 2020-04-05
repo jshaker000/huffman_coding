@@ -24,6 +24,36 @@
 
 #include "ancillary_functions.h"
 
+static void update_key_write(std::uint8_t num_bits_to_read,
+                             std::uint8_t byte_to_read,
+                             std::pair<std::uint8_t,std::uint64_t> &key,
+                             std::unordered_map<std::pair<std::uint8_t, std::uint64_t>, char> &huffman_map,
+                             char *out_buffer,
+                             std::uint64_t out_buffsize,
+                             std::uint64_t &out_buff_bytes,
+                             std::fstream  &out_f)
+{
+    for (int j = 0; j < num_bits_to_read; j++)
+    {
+        key.first  += 1;
+        key.second *= 2;
+        key.second += (byte_to_read >> (7-j)) & 0x01;
+        auto found = huffman_map.find(key);
+        if ((found != huffman_map.end()))
+        {
+            out_buffer[out_buff_bytes] = found->second;
+            out_buff_bytes += 1;
+            if (out_buff_bytes == out_buffsize)
+            {
+                out_f.write(out_buffer, out_buffsize);
+                out_buff_bytes = 0;
+            }
+            key.first  = 0;
+            key.second = 0;
+        }
+    }
+}
+
 int main (int argc, char* argv[])
 {
 
@@ -54,11 +84,11 @@ int main (int argc, char* argv[])
         std::cerr << "DECODE: Error opening " << in << std::endl;
         return 2;
     }
-
-    constexpr int in_buffsize  = 256*1024;
+    // bug if this equals 1 (and its slower anyway so don't do that)
+    constexpr std::uint64_t in_buffsize  = 256*1024;
     std::unique_ptr<char[]> in_buffer(new char[in_buffsize]);
-    std::unordered_map<std::pair<std::uint8_t, std::uint64_t>, char> huffman_map;
 
+    std::unordered_map<std::pair<std::uint8_t, std::uint64_t>, char> huffman_map;
     // read in the number of symbols
     int num_codes;
     {
@@ -81,13 +111,11 @@ int main (int argc, char* argv[])
 
         // read data back, LSBs first
         int bytes_to_read = enc_len%8 == 0 ? enc_len/8 : enc_len/8 + 1;
-        std::uint64_t pow256 = 0x01;
         for (int i = 0; i < bytes_to_read; i++)
         {
             char tmp;
             in_f.get(tmp);
-            byte_code += static_cast<std::uint8_t>(tmp) * pow256;
-            pow256    *= 0x0100;
+            byte_code += static_cast<std::uint8_t>(tmp) << (8*i);
         }
         if (!huffman_map.emplace(std::pair<std::uint8_t, std::uint64_t>(static_cast<std::uint8_t>(enc_len), byte_code), symbol).second)
         {
@@ -103,55 +131,69 @@ int main (int argc, char* argv[])
         return 4;
     }
 
-    std::pair          <std::uint8_t, std::uint64_t> key(0,0);
-    std::unordered_map <std::pair<std::uint8_t, std::uint64_t>, char>::const_iterator found;
+    constexpr std::uint64_t out_buffsize  = 256*1024;
+    std::uint64_t out_buff_bytes          = 0;
+    std::unique_ptr<char[]> out_buffer(new char[out_buffsize]);
 
-    // extract the next bit into 'current code'
+    std::pair <std::uint8_t, std::uint64_t> key(0,0);
+    char second_to_last_byte_read;
+    char last_byte_read;
+    bool first_time = true;
+    // extract the next bit into the key
     // appropriately checking the <length, binary code> pair until it matches a symbol in the map, then
-    // writing to a file
+    // write to a file
+    // the last 2 bytes in the file must be treated differently as they have the last code and the num bits of the
+    // last byte to read
     while (in_f)
     {
         in_f.read (in_buffer.get(), in_buffsize);
-        // loop all bytes read except for the last 2 iff they are the last 2 in the file
-        for (int i = 0; (in_f && i < in_f.gcount()) || (!in_f && i < in_f.gcount() - 2); i++)
+        if (in_f.gcount() == 1)
         {
-            std::uint8_t pow2 = 0x0080;
-            for (int j = 0; j < 8; j++)
+            second_to_last_byte_read = last_byte_read;
+            last_byte_read           = in_buffer.get()[0];
+        }
+        else
+        {
+            if (!first_time)
             {
-                key.first  += 1;
-                key.second *= 2;
-                key.second += ((static_cast<uint8_t>(in_buffer.get()[i]) / pow2) & 0x01);
-                found = huffman_map.find(key);
-                if ((found != huffman_map.end()))
-                {
-                    out_f.put(found->second);
-                    key.first  = 0;
-                    key.second = 0;
-                }
-                pow2 /= 2;
+                update_key_write(8,
+                                 static_cast<std::uint8_t>(last_byte_read),
+                                 key,
+                                 huffman_map,
+                                 out_buffer.get(),
+                                 out_buffsize,
+                                 out_buff_bytes,
+                                 out_f);
             }
+            second_to_last_byte_read = in_buffer.get()[in_f.gcount()-2];
+            last_byte_read           = in_buffer.get()[in_f.gcount()-1];
+        }
+        // loop all bytes read except for the last 2 iff they are the last 2 in the file
+        for (int i = 0; (in_f && i < in_f.gcount() - 1) || (!in_f && i < in_f.gcount() - 2); i++)
+        {
+            update_key_write(8,
+                             static_cast<std::uint8_t>(in_buffer.get()[i]),
+                             key,
+                             huffman_map,
+                             out_buffer.get(),
+                             out_buffsize,
+                             out_buff_bytes,
+                             out_f);
         }
         // read in only as many bits from the second to last byte as stated in the last byte
         if (!in_f)
         {
-            std::uint8_t pow2 = 0x0080;
-            for (int j = 0; j < in_buffer.get()[in_f.gcount() - 1]; j++)
-            {
-                key.first  += 1;
-                key.second *= 2; 
-                key.second += ((static_cast<uint8_t>(in_buffer.get()[in_f.gcount()-2]) / pow2) & 0x01);
-
-                found = huffman_map.find(key);
-
-                if ((found != huffman_map.end()))
-                {
-                    out_f.put(static_cast<char>(found->second));
-                    key.first  = 0;
-                    key.second = 0;
-                }
-                pow2 /= 2;
-            }
+            update_key_write(static_cast<std::uint8_t>(last_byte_read),
+                             static_cast<std::uint8_t>(second_to_last_byte_read),
+                             key,
+                             huffman_map,
+                             out_buffer.get(),
+                             out_buffsize,
+                             out_buff_bytes,
+                             out_f);
         }
+        first_time = false;
     }
+    out_f.write(out_buffer.get(), out_buff_bytes);
     return 0;
 }
