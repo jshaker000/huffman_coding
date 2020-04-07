@@ -74,7 +74,7 @@ int main (int argc, char* argv[])
     //sort by frequency
     std::sort(frequencies.begin(),
               frequencies.end(),
-              [](std::pair<char, std::uint64_t> a, std::pair<char,std::uint64_t> b)
+              [](const std::pair<char, std::uint64_t> &a, const std::pair<char,std::uint64_t> &b)
               { return a.second > b.second; }
              );
 
