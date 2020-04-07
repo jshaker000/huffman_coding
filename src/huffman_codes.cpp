@@ -1,5 +1,6 @@
 // prints the huffman codes of a file in a nicely formatted table
 
+#include <algorithm>
 #include <array>
 #include <cstdint>
 #include <iostream>
@@ -9,7 +10,6 @@
 #include <string>
 #include <unordered_map>
 #include <utility>
-#include <vector>
 
 #include <unistd.h>
 

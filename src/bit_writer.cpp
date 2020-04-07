@@ -1,7 +1,5 @@
 #include "bit_writer.h"
 
-#include <cmath>
-
 bit_writer::bit_writer (const std::string &out)
 {
     buffer = std::unique_ptr<char[]>(new char[buff_size]);
