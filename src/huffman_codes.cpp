@@ -52,8 +52,6 @@ int main (int argc, char* argv[])
 
     std::array<std::pair <char, std::uint64_t>,256> frequencies;
 
-    std::uint64_t old_length_bits = 0;
-    std::uint64_t new_length_bits = 0;
     int num_unique_chars = 0;
 
     for (int i = 0; i < frequencies.size(); i++)
@@ -74,25 +72,14 @@ int main (int argc, char* argv[])
     in_f.close();
 
     //sort by frequency
-    for (int i = 0; i < frequencies.size(); i++)
-    {
-        int temp_max = frequencies[i].second;
-        int temp_max_index = i;
-        for ( int j = i + 1; j < frequencies.size(); j++ )
-        {
-            if ( frequencies[j].second > temp_max )
-            {
-                temp_max = frequencies[j].second;
-                temp_max_index = j;
-            }
-        }
-        std::pair <char, std::uint64_t> temp = frequencies[i];
-        frequencies[i] = frequencies[temp_max_index];
-        frequencies[temp_max_index] = temp;
-    }
+    std::sort(frequencies.begin(),
+              frequencies.end(),
+              [](std::pair<char, std::uint64_t> a, std::pair<char,std::uint64_t> b)
+              { return a.second > b.second; }
+             );
 
     // non zero frequencies
-    for (int i = 0; i < frequencies.size() && frequencies[i].second!=0; i++)
+    for (int i = 0; i < frequencies.size() && frequencies[i].second != 0; i++)
     {
         num_unique_chars++;
     }
@@ -117,6 +104,8 @@ int main (int argc, char* argv[])
         return 4;
     }
 
+    std::uint64_t old_length_bits = 0;
+    std::uint64_t new_length_bits = 0;
 
     out_f     << "FILE:               " << in               << '\n'
               << "NUM_UNIQUE_SYMBOLS: " << num_unique_chars << '\n'

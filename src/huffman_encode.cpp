@@ -10,6 +10,7 @@
 // LAST BYTE HOLDS A TAG 1 - 8, saying how many bits of the second to last byte is encoded data
     // vs a pad
 
+#include <algorithm>
 #include <array>
 #include <cstdint>
 #include <iostream>
@@ -23,7 +24,6 @@
 
 #include "huffman_tree.h"
 #include "bit_writer.h"
-
 
 int main (int argc, char* argv[])
 {
@@ -63,8 +63,6 @@ int main (int argc, char* argv[])
 
     //stores ASCII_CODE, FREQUENCY
     std::array<std::pair <char, std::uint64_t>,256> frequencies;
-    std::uint64_t old_length_bits = 0;
-    std::uint64_t new_length_bits = 0;
 
     for (int i = 0; i < frequencies.size(); i++)
     {
@@ -83,23 +81,12 @@ int main (int argc, char* argv[])
         }
     }
 
-    // sort by frequency
-    for (int i = 0; i < frequencies.size(); i++)
-    {
-        int temp_max = frequencies[i].second;
-        int temp_max_index = i;
-        for (int j = i + 1; j < frequencies.size(); j++)
-        {
-            if ( frequencies[j].second > temp_max )
-            {
-                temp_max = frequencies[j].second;
-                temp_max_index = j;
-            }
-        }
-        std::pair <char, std::uint64_t> temp = frequencies[i];
-        frequencies[i] = frequencies[temp_max_index];
-        frequencies[temp_max_index] = temp;
-    }
+    //sort by frequency
+    std::sort(frequencies.begin(),
+              frequencies.end(),
+              [](std::pair<char, std::uint64_t> a, std::pair<char,std::uint64_t> b)
+              { return a.second > b.second; }
+             );
 
     // number the non zero frequencies
     int num_unique_chars = 0;
@@ -128,6 +115,9 @@ int main (int argc, char* argv[])
         std::cerr << "ENCODE: Error opening " << out << std::endl;
         return 4;
     }
+
+    std::uint64_t old_length_bits = 0;
+    std::uint64_t new_length_bits = 0;
 
     // write the number of symbol codes to the file
     out_f.put(static_cast<char>((num_unique_chars >> 8) & 0xFF));
