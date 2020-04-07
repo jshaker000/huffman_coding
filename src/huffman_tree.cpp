@@ -4,6 +4,7 @@
 
 #include "huffman_tree.h"
 
+// assumes frequency is sorted in decending order
 huffman_tree::huffman_tree(const std::array<std::pair <char, std::uint64_t>,256> & frequency)
 {
     //finds the bottommost nonzero frequency symbol

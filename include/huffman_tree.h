@@ -7,8 +7,8 @@
 #include <utility>
 #include <unordered_map>
 
-// expects to take in a sorted array of pairs
-// <symbol, frequency>
+// expects to take in a descended sorted array of pairs
+// <symbol, frequency> by frequency
 // and then be used to parse into an unordered map of
 // <symbol, <length,encoding>> for encoding
 class huffman_tree

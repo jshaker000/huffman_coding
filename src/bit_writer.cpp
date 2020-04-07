@@ -18,20 +18,24 @@ bit_writer::~bit_writer()
     out_f.close();
 }
 
-// adds the smallest bits_to_add of bits into the buffer and saves the new position
+// adds the smallest num_bits_to_add of bits into the buffer and saves the new position
 // flush buffer when needed
-void bit_writer::add_bits(std::uint8_t bits_to_add, std::uint64_t bits)
+void bit_writer::add_bits(std::uint8_t num_bits_to_add, std::uint64_t bits)
 {
     std::uint64_t index_to_add = current_bits >>    3;
     std::uint8_t  slot_to_add  = current_bits &  0x07;
 
-    while (bits_to_add != 0)
+    for (std::uint8_t i = 0; i < num_bits_to_add; i++)
     {
-        buffer.get()[index_to_add] |= (bits & (1<<(bits_to_add - 1))) >> (bits_to_add - 1)
-                                      << (7 - slot_to_add);
+        // slot in the bits, MSB first, into the bufffer
+        buffer.get()[index_to_add] = static_cast<char>(
+                                       static_cast<std::uint8_t>(buffer.get()[index_to_add]) |
+                                         (((bits >> (num_bits_to_add - i - 0x01)) & 0x01)
+                                         << (0x07 - slot_to_add))
+                                      );
         slot_to_add++;
 
-        if (slot_to_add == 8)
+        if (slot_to_add == 0x08)
         {
             slot_to_add = 0;
             index_to_add++;
@@ -44,6 +48,5 @@ void bit_writer::add_bits(std::uint8_t bits_to_add, std::uint64_t bits)
             buffer.get()[index_to_add] = '\0';
         }
         current_bits++;
-        bits_to_add--;
     }
 }
