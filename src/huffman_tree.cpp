@@ -47,13 +47,13 @@ huffman_tree::huffman_tree(const std::array<std::pair <char, std::uint64_t>,256>
     // everything is under one big tree
     for (int i = 0; i < num_unique - 1; i++)
     {
-        std::unique_ptr<struct huffman_tree::huffman_node> inner_node(new huffman_tree::huffman_node);
+        std::unique_ptr<struct huffman_tree::huffman_node> inner_node(new struct huffman_tree::huffman_node);
 
         inner_node->left  = std::move(node_list[num_unique-i-1]);
         inner_node->right = std::move(node_list[num_unique-i-2]);
         inner_node->frequency = inner_node->right->frequency + inner_node->left->frequency;
 
-        // find where to insert
+        // find where to insert and push thing back as needed
         for (int j = 0; j < num_unique-i-1; j++)
         {
             if (j == num_unique-i-2 || inner_node->frequency > node_list[j]->frequency)
