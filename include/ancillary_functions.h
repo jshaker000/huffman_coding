@@ -46,11 +46,10 @@ std::string to_binary(T num, std::uint8_t bits)
     }
     else
     {
-        while (bits)
+        for (std::uint8_t i = 0; i < bits; i++)
         {
-            s = static_cast<char>((num & 0x01) + '0')+s;
+            s = static_cast<char>((num & 0x01) + '0') + s;
             num >>= 1;
-            bits--;
         }
     }
     return s;
@@ -60,6 +59,7 @@ std::string printable_ASCII (unsigned char c)
 {
     switch ( c )
     {
+        // speical chars
         case '\a': return ( "\\a " );
         case '\b': return ( "\\b " );
         case '\n': return ( "\\n " );
@@ -69,18 +69,20 @@ std::string printable_ASCII (unsigned char c)
         case ' ' : return ("\" \"");
         default:
             std::string s;
-            if ( c >= 0x20 && c <=0x7E )
+            // printable chars
+            if (c >= 0x20 && c <=0x7E)
             {
                 s.push_back(c);
                 s += "  ";
                 return s;
             }
+            // hex
             else
             {
-                char high  = ((c&0xF0) >> 4 );
+                char high  = ((c&0xF0) >> 4);
                 char low   = ((c&0x0F));
-                s+= (high >= 10 ? high+'A' : high+'0');
-                s+= (low  >= 10 ? low +'A' : low +'0');
+                s += (high >= 0x0A ? high+'A'-0x0A : high+'0');
+                s += (low  >= 0x0A ? low +'A'-0x0A : low +'0');
                 return "0x" + s;
             }
     }
