@@ -7,15 +7,22 @@
 // assumes frequency is sorted in decending order
 huffman_tree::huffman_tree(const std::array<std::pair <char, std::uint64_t>,256> & frequency)
 {
-    //finds the bottommost nonzero frequency symbol
-    int position = frequency.size() - 1;
-    while (position != 0 && frequency[position].second == 0)
-        position--;
+    // find the bottommost nonzero frequency symbol
+    int position = -1;
+    while (position != 255 && frequency[position+1].second != 0)
+        position++;
 
-    //special case of input file only having one character
-    if (position == 0)
+    const int num_unique = position + 1;
+
+    //special case of input file only having 0/1 distinct character
+    if (num_unique == 0)
     {
-        root_node.reset(new huffman_tree::huffman_node );
+        std::cerr << "Huffman Tree: input frequency map seems to be empty!" << std::endl;
+        std::exit(-1);
+    }
+    if (num_unique == 1)
+    {
+        root_node.reset(new huffman_tree::huffman_node);
         root_node->right.reset(new huffman_tree::huffman_node);
         root_node->left.reset(new huffman_tree::huffman_node);
 
@@ -24,47 +31,41 @@ huffman_tree::huffman_tree(const std::array<std::pair <char, std::uint64_t>,256>
         return;
     }
 
-    //build a list of nodes
+    //build a list of nodes for each symbol, in decending order
     std::vector<std::unique_ptr<struct huffman_tree::huffman_node>> node_list;
+    node_list.reserve(num_unique);
 
-    for (int i = 0; i < position + 1; i++)
+    for (int i = 0; i < num_unique; i++)
     {
-        std::unique_ptr<struct huffman_tree::huffman_node> temp(new struct huffman_tree::huffman_node);
-        node_list.push_back(std::move(temp));
-        node_list[i]->data      = frequency[i].first;
-        node_list[i]->frequency = frequency[i].second;
-        //std::cerr << node_list[i]->data << '\t' << node_list[i]->frequency << std::endl;
+        std::unique_ptr<struct huffman_tree::huffman_node> tmp(new struct huffman_tree::huffman_node);
+        tmp->data      = frequency[i].first;
+        tmp->frequency = frequency[i].second;
+        node_list.push_back(std::move(tmp));
     }
 
-    // loop through the list of nodes and take the bottom two and put them into a new node until 
+    // loop through the list of nodes and take the bottom two and put them into a new node until
     // everything is under one big tree
-    while (node_list.size() != 1)
+    for (int i = 0; i < num_unique - 1; i++)
     {
         std::unique_ptr<struct huffman_tree::huffman_node> inner_node(new huffman_tree::huffman_node);
 
-        inner_node->left  = std::move(node_list[position]);
-        inner_node->right = std::move(node_list[position-1]);
+        inner_node->left  = std::move(node_list[num_unique-i-1]);
+        inner_node->right = std::move(node_list[num_unique-i-2]);
         inner_node->frequency = inner_node->right->frequency + inner_node->left->frequency;
 
-        node_list.pop_back();
-
-        //  std::cerr << "current position: " << position << '\n'
-        //            << '\t' << inner_node->left->data << ":" << inner_node->left->frequency
-        //            << "+" << inner_node->right->data << ":" << inner_node->right->frequency << " = " << inner_node->frequency << std::endl;
-        for (int i = 0; i < position; i++)
+        // find where to insert
+        for (int j = 0; j < num_unique-i-1; j++)
         {
-            if (node_list[i] == nullptr || inner_node->frequency > node_list[i]->frequency)
+            if (j == num_unique-i-2 || inner_node->frequency > node_list[j]->frequency)
             {
-                for (int j = position; j > i && position != 1; j--)
+                for (int k = num_unique-i-2; k > j; k--)
                 {
-                    node_list[j] = std::move(node_list[j-1]);
+                    node_list[k] = std::move(node_list[k-1]);
                 }
-                //std::cerr << "\tWriting to index " << i << std::endl;
-                node_list[i] = std::move(inner_node);
+                node_list[j] = std::move(inner_node);
                 break;
             }
         }
-        position--;
     }
     root_node = std::move(node_list[0]);
 }
