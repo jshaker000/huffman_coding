@@ -25,7 +25,7 @@ class huffman_tree
             std::unique_ptr <struct huffman_tree::huffman_node> left  = nullptr;
             std::unique_ptr <struct huffman_tree::huffman_node> right = nullptr;
             std::uint64_t frequency = 0;
-            char data = 0;
+            char data               = 0x00;
         };
 
         //prohibit copy constructor

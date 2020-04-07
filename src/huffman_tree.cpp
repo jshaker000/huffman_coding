@@ -15,12 +15,12 @@ huffman_tree::huffman_tree(const std::array<std::pair <char, std::uint64_t>,256>
     const int num_unique = position + 1;
 
     //special case of input file only having 0/1 distinct character
-    if (num_unique == 0)
+    if (num_unique == 0) // error
     {
         std::cerr << "Huffman Tree: input frequency map seems to be empty!" << std::endl;
         std::exit(-1);
     }
-    if (num_unique == 1)
+    if (num_unique == 1) // right now, each ndoe needs 0 or 2 children. So invert the symbol to make the other one
     {
         root_node.reset(new huffman_tree::huffman_node);
         root_node->right.reset(new huffman_tree::huffman_node);
@@ -28,6 +28,11 @@ huffman_tree::huffman_tree(const std::array<std::pair <char, std::uint64_t>,256>
 
         root_node->right->data = frequency[0].first;
         root_node->left->data  = frequency[0].first ^ static_cast<char>(0xFF);
+
+        root_node->frequency        = frequency[0].second;
+        root_node->right->frequency = frequency[0].second;
+        root_node->left->frequency  = 0;
+
         return;
     }
 
@@ -49,8 +54,8 @@ huffman_tree::huffman_tree(const std::array<std::pair <char, std::uint64_t>,256>
     {
         std::unique_ptr<struct huffman_tree::huffman_node> inner_node(new struct huffman_tree::huffman_node);
 
-        inner_node->left  = std::move(node_list[num_unique-i-1]);
         inner_node->right = std::move(node_list[num_unique-i-2]);
+        inner_node->left  = std::move(node_list[num_unique-i-1]);
         inner_node->frequency = inner_node->right->frequency + inner_node->left->frequency;
 
         // find where to insert and push thing back as needed
