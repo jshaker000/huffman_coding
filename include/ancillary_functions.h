@@ -30,25 +30,26 @@ template <class T>
 std::string to_binary(T num, std::uint8_t bits)
 {
     std::string s = "";
+    // special arg, pad to nearest byte.
     if (bits == 0xFF)
     {
-        while ( num != 0 )
+        while (num != 0)
         {
-            s = (char)( (num&1) + 0x30 ) + s;
+            s = static_cast<char>( (num&0x01) +'0') + s;
             num >>= 1;
         }
 
-        while ( s.length() % 8 != 0 || s.length() == 0 )
+        while (s.length() % 8 != 0 || s.length() == 0)
         {
             s = "0" + s;
         }
     }
     else
     {
-        while ( bits )
+        while (bits)
         {
-            s = static_cast<char>( (num&1) + '0')+s;
-            num /= 2;
+            s = static_cast<char>((num & 0x01) + '0')+s;
+            num >>= 1;
             bits--;
         }
     }
@@ -70,16 +71,16 @@ std::string printable_ASCII (unsigned char c)
             std::string s;
             if ( c >= 0x20 && c <=0x7E )
             {
-                s.push_back( c );
+                s.push_back(c);
                 s += "  ";
-                return ( s );
+                return s;
             }
             else
             {
-                char high  = ( ( c & 0xF0 ) >> 4 );
-                char low   = ( ( c & 0x0F ) );
-                s+= ( high >= 10 ? high+0x37 : high+0x30);
-                s+= ( low  >= 10 ? low +0x37 : low +0x30);
+                char high  = ((c&0xF0) >> 4 );
+                char low   = ((c&0x0F));
+                s+= (high >= 10 ? high+'A' : high+'0');
+                s+= (low  >= 10 ? low +'A' : low +'0');
                 return "0x" + s;
             }
     }
