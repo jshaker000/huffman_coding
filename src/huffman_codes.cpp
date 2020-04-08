@@ -14,7 +14,7 @@
 #include <unistd.h>
 
 #include "huffman_encode_tree.h"
-#include "ancillary_functions.h"
+#include "print_functions.h"
 
 int main (int argc, char* argv[])
 {
@@ -120,7 +120,7 @@ int main (int argc, char* argv[])
             std::string code = huffman::to_binary(static_cast<char>(huffman_map[frequencies[i].first].second),
                                                   huffman_map[frequencies[i].first].first);
 
-            out_f     << "| " << std::setw(10) << huffman::printable_ASCII(frequencies[i].first) << "  | "
+            out_f     << "| " << std::setw(10) << huffman::printable_ascii(frequencies[i].first) << "  | "
                       << std::setw(9)  << frequencies[ i ].second << " | "
                       << std::setw(25) << code << " | "
                       << std::setw(17) << code.length() << " |" << std::endl;
