@@ -10,7 +10,7 @@ SRCDIR     := ${CURDIR}
 IDIR       := ${CURDIR}/../include
 ODIR       := ${CURDIR}/../obj
 CXX        := g++
-CXXFLAGS   := -std=c++11 -O3 -flto -I${IDIR}
+CXXFLAGS   := -std=c++11 -O3 -flto -Wall -Werror -I${IDIR}
 
 TARGETS := huffman_encode huffman_decode huffman_codes
 
