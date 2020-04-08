@@ -37,6 +37,7 @@ void huffman::bit_writer::add_bits(std::uint8_t num_bits_to_add, std::uint64_t b
         if (slot_to_add == 0x08)
         {
             slot_to_add = 0;
+            index_to_add++;
 
             if (index_to_add == buff_size)
             {
