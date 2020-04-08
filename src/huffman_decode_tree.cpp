@@ -6,7 +6,7 @@
 huffman::huffman_decode_tree::huffman_decode_tree(const std::vector<std::tuple<char,std::uint8_t, std::uint64_t>> &nodes)
 {
     root_node.reset(new huffman::huffman_decode_tree::huffman_node);
-    for (auto &n : nodes)
+    for (auto const &n : nodes)
     {
         char symbol            = std::get<0>(n);
         std::uint8_t  len      = std::get<1>(n);
