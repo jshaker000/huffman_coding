@@ -16,13 +16,13 @@ CXXFLAGS   := -std=c++11 -O3 -I$(IDIR)
 
 TARGETS := huffman_encode huffman_decode huffman_codes
 
-_DEPS   := bit_writer.h huffman_tree.h ancillary_functions.h
+_DEPS   := bit_writer.h huffman_encode_tree.h huffman_decode_tree.h ancillary_functions.h
 DEPS    := $(patsubst %,$(IDIR)/%,$(_DEPS))
 
 _MAINS  := $(addsuffix .o, $(TARGETS) )
 MAINS   := $(patsubst %,$(ODIR)/%,$(_MAINS))
 
-_OBJ    := huffman_tree.o bit_writer.o $(_MAINS)
+_OBJ    := huffman_encode_tree.o huffman_decode_tree.o bit_writer.o $(_MAINS)
 OBJ     := $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 .PHONY: all install uninstall remove clean

@@ -13,50 +13,56 @@
     // vs a pad
 
 #include <cstdint>
+#include <cstdlib>
 #include <iostream>
 #include <fstream>
 #include <memory>
 #include <string>
+#include <tuple>
 #include <utility>
-#include <unordered_map>
+#include <vector>
 
 #include <unistd.h>
 
-#include "ancillary_functions.h"
+#include "huffman_decode_tree.h"
 
-static void update_key_write(std::uint8_t num_bits_to_read,
-                             std::uint8_t byte_to_read,
-                             std::pair<std::uint8_t,std::uint64_t> &key,
-                             const std::unordered_map<std::pair<std::uint8_t, std::uint64_t>, char> &huffman_map,
-                             char *out_buffer,
-                             std::uint64_t out_buffsize,
-                             std::uint64_t &out_buff_bytes,
-                             std::fstream  &out_f)
+static void traverse_tree_write(std::uint8_t num_bits_to_read,
+                                std::uint8_t byte_to_read,
+                                huffman::huffman_decode_tree &decode_tree,
+                                char *out_buffer,
+                                std::uint64_t out_buffsize,
+                                std::uint64_t &out_buff_bytes,
+                                std::fstream  &out_f)
 {
     for (int j = 0; j < num_bits_to_read; j++)
     {
-        key.first  += 1;
-        key.second *= 2;
-        key.second += (byte_to_read >> (7-j)) & 0x01;
-        auto found = huffman_map.find(key);
-        if ((found != huffman_map.end()))
+        huffman::huffman_decode_tree::Direction d = ((byte_to_read >> (7-j)) & 0x01) == 0x01 ? huffman::huffman_decode_tree::Direction::RIGHT :
+                                                    huffman::huffman_decode_tree::Direction::LEFT;
+        std::tuple<bool, bool, char> traverse_result = decode_tree.move_direction(d);
+        bool valid = std::get<0>(traverse_result);
+        bool leaf  = std::get<1>(traverse_result);
+        char data  = std::get<2>(traverse_result);
+        if (valid && leaf)
         {
-            out_buffer[out_buff_bytes] = found->second;
+            out_buffer[out_buff_bytes] = data;
             out_buff_bytes += 1;
             if (out_buff_bytes == out_buffsize)
             {
                 out_f.write(out_buffer, out_buffsize);
                 out_buff_bytes = 0;
             }
-            key.first  = 0;
-            key.second = 0;
+            decode_tree.move_direction(huffman::huffman_decode_tree::Direction::RESET);
+        }
+        else if (!valid)
+        {
+            std::cerr << "Huffman Decode: Error Parsing File (traversing symbol tree)" << std::endl;
+            std::exit(-1);
         }
     }
 }
 
 int main (int argc, char* argv[])
 {
-
     std::string in;
     std::string out;
 
@@ -88,7 +94,6 @@ int main (int argc, char* argv[])
     constexpr std::uint64_t in_buffsize  = 256*1024;
     std::unique_ptr<char[]> in_buffer(new char[in_buffsize]);
 
-    std::unordered_map<std::pair<std::uint8_t, std::uint64_t>, char> huffman_map;
     // read in the number of symbols
     int num_codes;
     {
@@ -98,8 +103,11 @@ int main (int argc, char* argv[])
         num_codes = (static_cast<unsigned int>(byte_0) * 0x0100) + static_cast<unsigned int>(byte_1);
     }
 
-    // iterate through each symbol table in header and build the unordered map
-    // pair <length, code(binary)>, ASCII SYMBOL
+    std::vector <std::tuple<char, std::uint8_t, std::uint64_t>> huffman_nodes;
+    huffman_nodes.reserve(num_codes);
+
+    // iterate through each symbol table in header and build the list of nodes
+    // symbol, length, byte code
     for (int i=0; i < num_codes; i++)
     {
         char symbol  = 0;
@@ -117,11 +125,11 @@ int main (int argc, char* argv[])
             in_f.get(tmp);
             byte_code += static_cast<std::uint8_t>(tmp) << (8*i);
         }
-        if (!huffman_map.emplace(std::pair<std::uint8_t, std::uint64_t>(static_cast<std::uint8_t>(enc_len), byte_code), symbol).second)
-        {
-            std::cerr << "DECODE: key collision building hashtable. error" << std::endl;
-            return 3;
-        }
+        huffman_nodes.push_back(
+            std::make_tuple(symbol,
+                            static_cast<std::uint8_t>(enc_len),
+                            byte_code)
+        );
     }
 
     std::fstream out_f(out, std::ios::binary | std::ios::out);
@@ -135,12 +143,13 @@ int main (int argc, char* argv[])
     std::uint64_t out_buff_bytes          = 0;
     std::unique_ptr<char[]> out_buffer(new char[out_buffsize]);
 
-    std::pair <std::uint8_t, std::uint64_t> key(0,0);
+
+    huffman::huffman_decode_tree decode_tree(huffman_nodes);
+
     char second_to_last_byte_read;
     char last_byte_read;
     bool first_time = true;
-    // extract the next bit into the key
-    // appropriately checking the <length, binary code> pair until it matches a symbol in the map, then
+    // extract the next bit and traverse the tree until we hit a leaf
     // write to a file
     // the last 2 bytes in the file must be treated differently as they have the last code and the num bits of the
     // last byte to read
@@ -156,14 +165,13 @@ int main (int argc, char* argv[])
         {
             if (!first_time)
             {
-                update_key_write(8,
-                                 static_cast<std::uint8_t>(last_byte_read),
-                                 key,
-                                 huffman_map,
-                                 out_buffer.get(),
-                                 out_buffsize,
-                                 out_buff_bytes,
-                                 out_f);
+                traverse_tree_write(8,
+                                    static_cast<std::uint8_t>(last_byte_read),
+                                    decode_tree,
+                                    out_buffer.get(),
+                                    out_buffsize,
+                                    out_buff_bytes,
+                                    out_f);
             }
             second_to_last_byte_read = in_buffer.get()[in_f.gcount()-2];
             last_byte_read           = in_buffer.get()[in_f.gcount()-1];
@@ -171,26 +179,24 @@ int main (int argc, char* argv[])
         // loop all bytes read except for the last 2 iff they are the last 2 in the file
         for (int i = 0; (in_f && i < in_f.gcount() - 1) || (!in_f && i < in_f.gcount() - 2); i++)
         {
-            update_key_write(8,
-                             static_cast<std::uint8_t>(in_buffer.get()[i]),
-                             key,
-                             huffman_map,
-                             out_buffer.get(),
-                             out_buffsize,
-                             out_buff_bytes,
-                             out_f);
+            traverse_tree_write(8,
+                                static_cast<std::uint8_t>(in_buffer.get()[i]),
+                                decode_tree,
+                                out_buffer.get(),
+                                out_buffsize,
+                                out_buff_bytes,
+                                out_f);
         }
         // read in only as many bits from the second to last byte as stated in the last byte
         if (!in_f)
         {
-            update_key_write(static_cast<std::uint8_t>(last_byte_read),
-                             static_cast<std::uint8_t>(second_to_last_byte_read),
-                             key,
-                             huffman_map,
-                             out_buffer.get(),
-                             out_buffsize,
-                             out_buff_bytes,
-                             out_f);
+            traverse_tree_write(static_cast<std::uint8_t>(last_byte_read),
+                                static_cast<std::uint8_t>(second_to_last_byte_read),
+                                decode_tree,
+                                out_buffer.get(),
+                                out_buffsize,
+                                out_buff_bytes,
+                                out_f);
         }
         first_time = false;
     }

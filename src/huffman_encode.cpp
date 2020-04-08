@@ -22,7 +22,7 @@
 
 #include <unistd.h>
 
-#include "huffman_tree.h"
+#include "huffman_encode_tree.h"
 #include "bit_writer.h"
 
 int main (int argc, char* argv[])
@@ -105,8 +105,8 @@ int main (int argc, char* argv[])
     // fill unordered map
     std::unordered_map<char, std::pair<std::uint8_t, std::uint64_t>> huffman_map;
     {
-        huffman_tree tree(frequencies);
-        tree.fill_unordered_map(huffman_map);
+        huffman::huffman_encode_tree enocde_tree(frequencies);
+        enocde_tree.fill_unordered_map(huffman_map);
     }
 
     std::fstream out_f(out, std::ios::binary | std::ios::out);
@@ -148,7 +148,7 @@ int main (int argc, char* argv[])
     in_f.clear();
     in_f.seekg(std::ios_base::beg);
     {
-        bit_writer b(out);
+        huffman::bit_writer b(out);
 
         //stream data and convert bits using lookup map
         //bit writer queues to write until a multiple of 8 bits is recieved

@@ -8,17 +8,20 @@
 
 // takes in a file name and appends to it bits.
 // takes in chars, but only reads "bits" at a time. Flushes on deconstruction
-class bit_writer
+namespace huffman
 {
-    public:
-        bit_writer(const std::string &);
-        ~bit_writer();
-        void add_bits (std::uint8_t, std::uint64_t);
-    private:
-        static constexpr std::uint64_t buff_size = 256*1024;
-        std::unique_ptr<char[]> buffer           = nullptr;
-        std::uint64_t current_bits = 0;
-        std::fstream out_f;
-};
+    class bit_writer
+    {
+        public:
+            bit_writer(const std::string &);
+            ~bit_writer();
+            void add_bits (std::uint8_t, std::uint64_t);
+        private:
+            static constexpr std::uint64_t buff_size = 256*1024;
+            std::unique_ptr<char[]> buffer           = nullptr;
+            std::uint64_t current_bits = 0;
+            std::fstream out_f;
+    };
+}
 
 #endif

@@ -13,7 +13,7 @@
 
 #include <unistd.h>
 
-#include "huffman_tree.h"
+#include "huffman_encode_tree.h"
 #include "ancillary_functions.h"
 
 int main (int argc, char* argv[])
@@ -30,7 +30,7 @@ int main (int argc, char* argv[])
 
     else if (argc == 2 || argc == 3)
     {
-        in  =   argv[1];
+        in = argv[1];
         out = argc == 2 ? "/dev/stdout" : argv[2];
     }
     else
@@ -93,8 +93,8 @@ int main (int argc, char* argv[])
     // fill unordered map
     std::unordered_map<char, std::pair<std::uint8_t, std::uint64_t>> huffman_map;
     {
-        huffman_tree tree(frequencies);
-        tree.fill_unordered_map(huffman_map);
+        huffman::huffman_encode_tree encode_tree(frequencies);
+        encode_tree.fill_unordered_map(huffman_map);
     }
 
     std::fstream out_f(out, std::ios::binary | std::ios::out);
@@ -117,10 +117,10 @@ int main (int argc, char* argv[])
     {
         if  (frequencies[ i ].second != 0)
         {
-            std::string code = to_binary(static_cast<char>(huffman_map[frequencies[i].first].second),
-                                         huffman_map[frequencies[i].first].first);
+            std::string code = huffman::to_binary(static_cast<char>(huffman_map[frequencies[i].first].second),
+                                                  huffman_map[frequencies[i].first].first);
 
-            out_f     << "| " << std::setw(10) << printable_ASCII(frequencies[i].first) << "  | "
+            out_f     << "| " << std::setw(10) << huffman::printable_ASCII(frequencies[i].first) << "  | "
                       << std::setw(9)  << frequencies[ i ].second << " | "
                       << std::setw(25) << code << " | "
                       << std::setw(17) << code.length() << " |" << std::endl;
