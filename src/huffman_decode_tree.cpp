@@ -42,6 +42,7 @@ huffman::huffman_decode_tree::huffman_decode_tree(const std::vector<std::tuple<c
 
 // moving working_ptr in direction d and return if the new position is valid (non nullptr),
 // is a leaf, and the data under it.
+// Used so you to can traverse the tree, find data, reset, etc to decode huffman encoded file
 std::tuple<bool, bool, char> huffman::huffman_decode_tree::move_direction(huffman::huffman_decode_tree::Direction d)
 {
     if (d == huffman::huffman_decode_tree::Direction::RESET)
@@ -64,6 +65,6 @@ std::tuple<bool, bool, char> huffman::huffman_decode_tree::move_direction(huffma
     bool is_valid = working_ptr != nullptr;
     bool is_leaf  = is_valid && working_ptr->left == nullptr && working_ptr->right == nullptr;
     char symbol   = is_leaf ? working_ptr->data : 0x00;
-    
+
     return std::make_tuple(is_valid, is_leaf, symbol);
 }

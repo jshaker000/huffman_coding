@@ -149,9 +149,7 @@ int main (int argc, char* argv[])
     in_f.seekg(std::ios_base::beg);
     {
         huffman::bit_writer b(out);
-
-        //stream data and convert bits using lookup map
-        //bit writer queues to write until a multiple of 8 bits is recieved
+        // stream data and convert bits using lookup map
         while (in_f)
         {
             in_f.read (in_buffer.get(), in_buffsize);

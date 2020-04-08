@@ -18,7 +18,7 @@ huffman::bit_writer::~bit_writer()
     out_f.close();
 }
 
-// adds the smallest num_bits_to_add of bits into the buffer and saves the new position
+// adds the  num_bits_to_add LSBS of bits to add in MSB order into the buffer and saves the new position
 // flush buffer when needed
 void huffman::bit_writer::add_bits(std::uint8_t num_bits_to_add, std::uint64_t bits)
 {
@@ -27,7 +27,6 @@ void huffman::bit_writer::add_bits(std::uint8_t num_bits_to_add, std::uint64_t b
 
     for (std::uint8_t i = 0; i < num_bits_to_add; i++)
     {
-        // slot in the bits, MSB first, into the bufffer
         buffer.get()[index_to_add] = static_cast<char>(
                                        static_cast<std::uint8_t>(buffer.get()[index_to_add]) |
                                          (((bits >> (num_bits_to_add - i - 0x01)) & 0x01)
@@ -38,7 +37,7 @@ void huffman::bit_writer::add_bits(std::uint8_t num_bits_to_add, std::uint64_t b
         if (slot_to_add == 0x08)
         {
             slot_to_add = 0;
-            index_to_add++;
+
             if (index_to_add == buff_size)
             {
                 out_f.write(buffer.get(), buff_size);

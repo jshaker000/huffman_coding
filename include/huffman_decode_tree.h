@@ -16,11 +16,10 @@ namespace huffman
             enum class Direction{RESET, LEFT, RIGHT, NONE};
             // moving working_ptr in direction d and return if the new position is valid (non nullptr),
             // is a leaf, and the data under it.
+            // In this way, you can put in one bit at a time and find if you've reached a leaf or not,
+            // then RESET and continue
             std::tuple <bool, bool, char> move_direction(huffman_decode_tree::Direction);
         private:
-           //pointers to its children, left and right
-           //the frequency of occurance of it and its children
-           //the letters contained under it and all its children
             struct huffman_node
             {
                 std::unique_ptr <struct huffman_decode_tree::huffman_node> left  = nullptr;
@@ -32,7 +31,9 @@ namespace huffman
             huffman_decode_tree(const huffman_decode_tree &);
             void   operator=(huffman_decode_tree);
 
+            // root
             std::unique_ptr<struct huffman_decode_tree::huffman_node> root_node = nullptr;
+            // where we are working (for move_direction)
             struct huffman_decode_tree::huffman_node *working_ptr = nullptr;
     };
 }

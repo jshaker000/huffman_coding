@@ -7,7 +7,8 @@
 #include <string>
 
 // takes in a file name and appends to it bits.
-// takes in chars, but only reads "bits" at a time. Flushes on deconstruction
+// Allowing you insert non bytes at a time
+// Flushes on deconstruction and adds a tag byte of how many bits in the second to last byte were valid
 namespace huffman
 {
     class bit_writer

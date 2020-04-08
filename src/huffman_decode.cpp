@@ -19,13 +19,15 @@
 #include <memory>
 #include <string>
 #include <tuple>
-#include <utility>
 #include <vector>
 
 #include <unistd.h>
 
 #include "huffman_decode_tree.h"
 
+// read in one bit at a time from the byte, turn left or right in the tree as appropriate
+// If we hit a leaf, write it to the file and restart traversing the tree from the root for the
+// next sequence.
 static void traverse_tree_write(std::uint8_t num_bits_to_read,
                                 std::uint8_t byte_to_read,
                                 huffman::huffman_decode_tree &decode_tree,

@@ -12,13 +12,12 @@ namespace huffman
     class huffman_encode_tree
     {
         public:
-            // expects array of symvol frequency pairs sorted in descending order by frequency
+            // expects array of <symbol,frequency> pairs sorted in descending order by frequency
+            // used to fill a map of chars -> (length, code)
+            // to easily read in bytes and encode them
             huffman_encode_tree(const std::array<std::pair <char, std::uint64_t>,256> &);
             void fill_unordered_map (std::unordered_map<char, std::pair<std::uint8_t, std::uint64_t>> & );
         private:
-           //pointers to its children, left and right
-           //the frequency of occurance of it and its children
-           //the letters contained under it and all its children
             struct huffman_node
             {
                 std::unique_ptr <struct huffman_encode_tree::huffman_node> left  = nullptr;
@@ -32,6 +31,7 @@ namespace huffman
             void   operator=(huffman_encode_tree);
 
             void recursive_fill (std::unordered_map<char, std::pair<std::uint8_t, std::uint64_t>> &, const huffman_encode_tree::huffman_node *, std::uint8_t, std::uint64_t) const;
+            // root node
             std::unique_ptr<struct huffman_encode_tree::huffman_node> root_node;
     };
 }

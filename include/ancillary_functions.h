@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <string>
 
+// extra functions to make printing / debugging easier
+
 namespace huffman
 {
     template <class T>
