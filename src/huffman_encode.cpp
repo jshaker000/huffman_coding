@@ -64,7 +64,7 @@ int main (int argc, char* argv[])
     //stores ASCII_CODE, FREQUENCY
     std::array<std::pair <char, std::uint64_t>,256> frequencies;
 
-    for (int i = 0; i < frequencies.size(); i++)
+    for (size_t i = 0; i < frequencies.size(); i++)
     {
         frequencies[i].first  = i;
         frequencies[i].second = 0;
@@ -91,7 +91,7 @@ int main (int argc, char* argv[])
     // number the non zero frequencies
     int num_unique_chars = 0;
 
-    for (int i = 0; i < frequencies.size() && frequencies[i].second != 0; i++)
+    for (size_t i = 0; i < frequencies.size() && frequencies[i].second != 0; i++)
     {
         num_unique_chars++;
     }

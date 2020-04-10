@@ -54,7 +54,7 @@ int main (int argc, char* argv[])
 
     int num_unique_chars = 0;
 
-    for (int i = 0; i < frequencies.size(); i++)
+    for (size_t i = 0; i < frequencies.size(); i++)
     {
         frequencies[i].first  = i;
         frequencies[i].second = 0;
@@ -79,7 +79,7 @@ int main (int argc, char* argv[])
              );
 
     // non zero frequencies
-    for (int i = 0; i < frequencies.size() && frequencies[i].second != 0; i++)
+    for (size_t i = 0; i < frequencies.size() && frequencies[i].second != 0; i++)
     {
         num_unique_chars++;
     }
@@ -113,7 +113,7 @@ int main (int argc, char* argv[])
               << "|    ASCII    | Frequency |       HUFFMAN Code        | New Length (bits) |" << '\n'
               << "+-------------+-----------+---------------------------+-------------------+" << std::endl;
 
-    for (int i = 0; i < frequencies.size(); i++)
+    for (size_t i = 0; i < frequencies.size(); i++)
     {
         if  (frequencies[ i ].second != 0)
         {
