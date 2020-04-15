@@ -8,9 +8,9 @@ huffman::huffman_decode_tree::huffman_decode_tree(const std::vector<std::tuple<c
     root_node.reset(new huffman::huffman_decode_tree::huffman_node);
     for (auto const &n : nodes)
     {
-        char symbol            = std::get<0>(n);
-        std::uint8_t  len      = std::get<1>(n);
-        std::uint64_t position = std::get<2>(n);
+        const char symbol            = std::get<0>(n);
+        const std::uint8_t  len      = std::get<1>(n);
+        const std::uint64_t position = std::get<2>(n);
         struct huffman::huffman_decode_tree::huffman_node *tmp_ptr = root_node.get();
         for (std::uint8_t i = 0; i < len; i++)
         {
