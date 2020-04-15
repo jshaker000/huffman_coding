@@ -3,22 +3,33 @@
 
 #include <cstdint>
 #include <memory>
-#include <tuple>
 #include <vector>
 
 namespace huffman
 {
+    struct symbol_len_encode
+    {
+        char symbol;
+        std::uint8_t  length;
+        std::uint64_t encoding;
+    };
+    struct decode_status
+    {
+        bool is_valid;
+        bool is_leaf;
+        char symbol;
+    };
     class huffman_decode_tree
     {
         public:
             // takes a vector of tuples 'symbol, length, position' and maps into a tree
-            huffman_decode_tree(const std::vector<std::tuple <char, std::uint8_t, std::uint64_t>> &);
+            huffman_decode_tree(const std::vector<struct huffman::symbol_len_encode> &);
             enum class Direction{RESET, LEFT, RIGHT, NONE};
             // moving working_ptr in direction d and return if the new position is valid (non nullptr),
             // is a leaf, and the data under it.
             // In this way, you can put in one bit at a time and find if you've reached a leaf or not,
             // then RESET and continue
-            std::tuple <bool, bool, char> move_direction(huffman_decode_tree::Direction);
+            struct huffman::decode_status move_direction(huffman_decode_tree::Direction);
         private:
             struct huffman_node
             {

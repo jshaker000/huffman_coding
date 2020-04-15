@@ -6,11 +6,11 @@
 
 // takes in a descended sorted by frequency array of <symbol, frequency>
 // Generates a huffman tree
-huffman::huffman_encode_tree::huffman_encode_tree(const std::array<std::pair <char, std::uint64_t>,256> & frequency)
+huffman::huffman_encode_tree::huffman_encode_tree(const std::array<struct huffman::symb_freq,256> & frequency)
 {
     // find the bottommost nonzero frequency symbol
     int position = -1;
-    while (position != 255 && frequency[position+1].second != 0)
+    while (position != 255 && frequency[position+1].frequency != 0)
         position++;
 
     const int num_unique = position + 1;
@@ -27,11 +27,11 @@ huffman::huffman_encode_tree::huffman_encode_tree(const std::array<std::pair <ch
         root_node->right.reset(new huffman::huffman_encode_tree::huffman_node);
         root_node->left.reset(new huffman::huffman_encode_tree::huffman_node);
 
-        root_node->right->data = frequency[0].first;
-        root_node->left->data  = frequency[0].first ^ static_cast<char>(0xFF);
+        root_node->right->data = frequency[0].symbol;
+        root_node->left->data  = frequency[0].symbol ^ static_cast<char>(0xFF);
 
-        root_node->frequency        = frequency[0].second;
-        root_node->right->frequency = frequency[0].second;
+        root_node->frequency        = frequency[0].frequency;
+        root_node->right->frequency = frequency[0].frequency;
         root_node->left->frequency  = 0;
 
         return;
@@ -44,8 +44,8 @@ huffman::huffman_encode_tree::huffman_encode_tree(const std::array<std::pair <ch
     for (int i = 0; i < num_unique; i++)
     {
         std::unique_ptr<struct huffman::huffman_encode_tree::huffman_node> tmp(new struct huffman::huffman_encode_tree::huffman_node);
-        tmp->data      = frequency[i].first;
-        tmp->frequency = frequency[i].second;
+        tmp->data      = frequency[i].symbol;
+        tmp->frequency = frequency[i].frequency;
         node_list.push_back(std::move(tmp));
     }
 
@@ -79,12 +79,12 @@ huffman::huffman_encode_tree::huffman_encode_tree(const std::array<std::pair <ch
 // finds all of the leaf nodes and inserts them, along with their symbol into an unordered map
 // symbol,  pair <len, code in binary>
 // for easy encoding
-void huffman::huffman_encode_tree::fill_unordered_map(std::unordered_map<char, std::pair<std::uint8_t, std::uint64_t>> & map)
+void huffman::huffman_encode_tree::fill_unordered_map(std::unordered_map<char, struct huffman::len_encode> &map)
 {
     recursive_fill(map, root_node.get(), 0, 0);
 }
 
-void huffman::huffman_encode_tree::recursive_fill(std::unordered_map<char, std::pair<std::uint8_t, std::uint64_t>> & map,
+void huffman::huffman_encode_tree::recursive_fill(std::unordered_map<char, struct huffman::len_encode> & map,
                                                   const huffman::huffman_encode_tree::huffman_node* const root,
                                                   std::uint8_t  len,
                                                   std::uint64_t huffman_code)
@@ -97,7 +97,7 @@ const
     }
     if (root->left == nullptr && root->right == nullptr)
     {
-        map.emplace(root->data, std::pair<std::uint8_t,std::uint64_t> (len, huffman_code));
+        map.emplace(root->data, (struct huffman::len_encode){.length=len, .encoding=huffman_code});
         return;
     }
     else

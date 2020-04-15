@@ -17,7 +17,6 @@
 #include <iomanip>
 #include <fstream>
 #include <memory>
-#include <utility>
 #include <unordered_map>
 
 #include <unistd.h>
@@ -62,12 +61,12 @@ int main (int argc, char* argv[])
     std::unique_ptr<char[]> in_buffer(new char [in_buffsize]);
 
     //stores ASCII_CODE, FREQUENCY
-    std::array<std::pair <char, std::uint64_t>,256> frequencies;
+    std::array<struct huffman::symb_freq,256> frequencies;
 
     for (size_t i = 0; i < frequencies.size(); i++)
     {
-        frequencies[i].first  = i;
-        frequencies[i].second = 0;
+        frequencies[i].symbol     = static_cast<char>(i);
+        frequencies[i].frequency = 0;
     }
 
     //do a first pass through the file counting frequencies
@@ -77,7 +76,7 @@ int main (int argc, char* argv[])
         for (int i = 0; i < in_f.gcount(); i++)
         {
             int index = in_buffer.get()[i] >= 0 ? in_buffer.get()[i] : in_buffer.get()[i] + 0x0100;
-            frequencies[index].second += 1;
+            frequencies[index].frequency += 1;
         }
     }
 
@@ -85,16 +84,14 @@ int main (int argc, char* argv[])
     std::sort(frequencies.begin(),
               frequencies.end(),
               [](const auto &a, const auto &b)
-              { return a.second > b.second; }
+              { return a.frequency > b.frequency; }
              );
 
     // number the non zero frequencies
     int num_unique_chars = 0;
 
-    for (size_t i = 0; i < frequencies.size() && frequencies[i].second != 0; i++)
-    {
+    for (size_t i = 0; i < frequencies.size() && frequencies[i].frequency != 0; i++)
         num_unique_chars++;
-    }
 
     if (num_unique_chars == 0)
     {
@@ -103,10 +100,10 @@ int main (int argc, char* argv[])
     }
 
     // fill unordered map
-    std::unordered_map<char, std::pair<std::uint8_t, std::uint64_t>> huffman_map;
+    std::unordered_map<char, struct huffman::len_encode> huffman_map;
     {
-        huffman::huffman_encode_tree enocde_tree(frequencies);
-        enocde_tree.fill_unordered_map(huffman_map);
+        huffman::huffman_encode_tree encode_tree(frequencies);
+        encode_tree.fill_unordered_map(huffman_map);
     }
 
     std::fstream out_f(out, std::ios::binary | std::ios::out);
@@ -128,9 +125,9 @@ int main (int argc, char* argv[])
     // SYMBOL[1 byte]  LENGTH[1 byte]  CODE[8 bytes]
     for (int i = 0; i < num_unique_chars; i++)
     {
-        std::uint8_t  symbol     = frequencies[i].first;
-        std::uint8_t  symbol_len = huffman_map[(frequencies[i].first)].first;
-        std::uint64_t symbol_enc = huffman_map[(frequencies[i].first)].second;
+        std::uint8_t  symbol     = frequencies[i].symbol;
+        std::uint8_t  symbol_len = huffman_map[(frequencies[i].symbol)].length;
+        std::uint64_t symbol_enc = huffman_map[(frequencies[i].symbol)].encoding;
         out_f.put(static_cast<char>(symbol));
         out_f.put(static_cast<char>(symbol_len));
 
@@ -155,8 +152,8 @@ int main (int argc, char* argv[])
             in_f.read (in_buffer.get(), in_buffsize);
             for (int i = 0; i < in_f.gcount(); i++)
             {
-                b.add_bits(huffman_map[(in_buffer.get()[i])].first, huffman_map[(in_buffer.get()[i])].second);
-                new_length_bits += huffman_map[(in_buffer.get()[i])].first;
+                b.add_bits(huffman_map[(in_buffer.get()[i])].length, huffman_map[(in_buffer.get()[i])].encoding);
+                new_length_bits += huffman_map[(in_buffer.get()[i])].length;
                 old_length_bits += 8;
             }
         }

@@ -18,7 +18,6 @@
 #include <fstream>
 #include <memory>
 #include <string>
-#include <tuple>
 #include <vector>
 
 #include <unistd.h>
@@ -40,13 +39,10 @@ static void traverse_tree_write(std::uint8_t num_bits_to_read,
     {
         huffman::huffman_decode_tree::Direction d = ((byte_to_read >> (7-j)) & 0x01) == 0x01 ? huffman::huffman_decode_tree::Direction::RIGHT :
                                                     huffman::huffman_decode_tree::Direction::LEFT;
-        std::tuple<bool, bool, char> traverse_result = decode_tree.move_direction(d);
-        bool valid = std::get<0>(traverse_result);
-        bool leaf  = std::get<1>(traverse_result);
-        char data  = std::get<2>(traverse_result);
-        if (valid && leaf)
+        huffman::decode_status traverse_result = decode_tree.move_direction(d);
+        if (traverse_result.is_valid && traverse_result.is_leaf)
         {
-            out_buffer[out_buff_bytes] = data;
+            out_buffer[out_buff_bytes] = traverse_result.symbol;
             out_buff_bytes += 1;
             if (out_buff_bytes == out_buffsize)
             {
@@ -55,7 +51,7 @@ static void traverse_tree_write(std::uint8_t num_bits_to_read,
             }
             decode_tree.move_direction(huffman::huffman_decode_tree::Direction::RESET);
         }
-        else if (!valid)
+        else if (!traverse_result.is_valid)
         {
             std::cerr << "Huffman Decode: Error Parsing File (traversing symbol tree)" << std::endl;
             std::exit(-1);
@@ -105,7 +101,7 @@ int main (int argc, char* argv[])
         num_codes = (static_cast<unsigned int>(byte_0) * 0x0100) + static_cast<unsigned int>(byte_1);
     }
 
-    std::vector <std::tuple<char, std::uint8_t, std::uint64_t>> huffman_nodes;
+    std::vector <struct huffman::symbol_len_encode> huffman_nodes;
     huffman_nodes.reserve(num_codes);
 
     // iterate through each symbol table in header and build the list of nodes
@@ -128,9 +124,9 @@ int main (int argc, char* argv[])
             byte_code += static_cast<std::uint8_t>(tmp) << (8*i);
         }
         huffman_nodes.push_back(
-            std::make_tuple(symbol,
-                            static_cast<std::uint8_t>(enc_len),
-                            byte_code)
+            (struct huffman::symbol_len_encode){.symbol=symbol,
+                                                .length=static_cast<std::uint8_t>(enc_len),
+                                                .encoding=byte_code}
         );
     }
 
