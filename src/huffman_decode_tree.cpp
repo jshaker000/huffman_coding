@@ -63,7 +63,7 @@ struct huffman::decode_status huffman::huffman_decode_tree::move_direction(huffm
     bool is_leaf  = is_valid && working_ptr->left == nullptr && working_ptr->right == nullptr;
     char symbol   = is_leaf ? working_ptr->data : 0x00;
 
-    return (struct huffman::decode_status){.is_valid = is_valid,
-                                           .is_leaf  = is_leaf,
-                                           .symbol   = symbol};
+    struct huffman::decode_status ds{ is_valid, is_leaf, symbol };
+
+    return ds;
 }

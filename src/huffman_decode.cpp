@@ -123,11 +123,8 @@ int main (int argc, char* argv[])
             in_f.get(tmp);
             byte_code += static_cast<std::uint8_t>(tmp) << (8*i);
         }
-        huffman_nodes.push_back(
-            (struct huffman::symbol_len_encode){.symbol=symbol,
-                                                .length=static_cast<std::uint8_t>(enc_len),
-                                                .encoding=byte_code}
-        );
+        huffman::symbol_len_encode sle{ symbol, static_cast<std::uint8_t>(enc_len), byte_code};
+        huffman_nodes.push_back(std::move(sle));
     }
 
     std::fstream out_f(out, std::ios::binary | std::ios::out);

@@ -97,7 +97,8 @@ const
     }
     if (root->left == nullptr && root->right == nullptr)
     {
-        map.emplace(root->data, (struct huffman::len_encode){.length=len, .encoding=huffman_code});
+        struct huffman::len_encode lc{len, huffman_code};
+        map.emplace(root->data, lc);
         return;
     }
     else
