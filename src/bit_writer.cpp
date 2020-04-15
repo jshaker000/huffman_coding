@@ -1,4 +1,4 @@
-#include<algorithm>
+#include <algorithm>
 
 #include "bit_writer.h"
 
