@@ -5,7 +5,7 @@
 huffman::bit_writer::bit_writer (const std::string &out)
 {
     buffer = std::unique_ptr<char[]>(new char[buff_size]);
-    std::for_each(buffer.get(), buffer.get()+buff_size, [](char &n){ n = '\0'; });
+    std::for_each(buffer.get(), buffer.get()+buff_size, [](auto &n){ n = '\0'; });
     out_f.open(out, std::ios::binary | std::ios::app);
 }
 
