@@ -105,7 +105,6 @@ int main (int argc, char* argv[])
         }
         num_codes = (static_cast<size_t>(static_cast<std::uint8_t>(byte_0) & 0xFF) * 0x0100)
                    + static_cast<size_t>(static_cast<std::uint8_t>(byte_1) & 0xFF);
-        std::cerr << "NumCodes: " << num_codes << std::endl;
     }
 
     std::vector <struct huffman::huffman_decode_tree::symbol_len_encode> huffman_nodes;
