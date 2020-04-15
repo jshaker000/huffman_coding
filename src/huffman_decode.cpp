@@ -93,12 +93,19 @@ int main (int argc, char* argv[])
     std::unique_ptr<char[]> in_buffer(new char[in_buffsize]);
 
     // read in the number of symbols
-    int num_codes;
+    size_t num_codes;
     {
         char byte_0, byte_1;
         in_f.get(byte_0);
         in_f.get(byte_1);
-        num_codes = (static_cast<unsigned int>(byte_0) * 0x0100) + static_cast<unsigned int>(byte_1);
+        if (in_f.fail())
+        {
+            std::cerr << "DECODE: Error parsing input file." << std::endl;
+            return 3;
+        }
+        num_codes = (static_cast<size_t>(static_cast<std::uint8_t>(byte_0) & 0xFF) * 0x0100)
+                   + static_cast<size_t>(static_cast<std::uint8_t>(byte_1) & 0xFF);
+        std::cerr << "NumCodes: " << num_codes << std::endl;
     }
 
     std::vector <struct huffman::huffman_decode_tree::symbol_len_encode> huffman_nodes;
@@ -106,7 +113,7 @@ int main (int argc, char* argv[])
 
     // iterate through each symbol table in header and build the list of nodes
     // symbol, length, byte code
-    for (int i=0; i < num_codes; i++)
+    for (size_t i=0; i < num_codes; i++)
     {
         char symbol  = 0;
         char enc_len = 0;
@@ -114,6 +121,11 @@ int main (int argc, char* argv[])
 
         in_f.get(symbol);
         in_f.get(enc_len);
+        if (in_f.fail())
+        {
+            std::cerr << "DECODE: Error parsing input file." << std::endl;
+            return 3;
+        }
 
         // read data back, LSBs first
         int bytes_to_read = enc_len%8 == 0 ? enc_len/8 : enc_len/8 + 1;
@@ -121,7 +133,12 @@ int main (int argc, char* argv[])
         {
             char tmp;
             in_f.get(tmp);
-            byte_code += static_cast<std::uint8_t>(tmp) << (8*i);
+            if (in_f.fail())
+            {
+                std::cerr << "DECODE: Error parsing input file." << std::endl;
+                return 3;
+            }
+            byte_code += static_cast<uint64_t>((static_cast<std::uint8_t>(tmp) & 0xFF)) << (8*i);
         }
         struct huffman::huffman_decode_tree::symbol_len_encode sle{ symbol, static_cast<std::uint8_t>(enc_len), byte_code};
         huffman_nodes.push_back(std::move(sle));
