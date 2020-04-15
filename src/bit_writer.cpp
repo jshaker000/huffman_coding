@@ -45,7 +45,7 @@ void huffman::bit_writer::add_bits(std::uint8_t num_bits_to_add, std::uint64_t b
                 out_f.write(buffer.get(), buff_size);
                 index_to_add =  0;
                 current_bits = -1;
-                std::for_each(buffer.get(), buffer.get()+buff_size, [](char &n){ n = '\0'; });
+                std::for_each(buffer.get(), buffer.get()+buff_size, [](auto &n){ n = '\0'; });
             }
         }
         current_bits++;
