@@ -39,7 +39,7 @@ static void traverse_tree_write(std::uint8_t num_bits_to_read,
     {
         huffman::huffman_decode_tree::Direction d = ((byte_to_read >> (7-j)) & 0x01) == 0x01 ? huffman::huffman_decode_tree::Direction::RIGHT :
                                                     huffman::huffman_decode_tree::Direction::LEFT;
-        huffman::decode_status traverse_result = decode_tree.move_direction(d);
+        struct huffman::huffman_decode_tree::decode_status traverse_result = decode_tree.move_direction(d);
         if (traverse_result.is_valid && traverse_result.is_leaf)
         {
             out_buffer[out_buff_bytes] = traverse_result.symbol;
@@ -101,7 +101,7 @@ int main (int argc, char* argv[])
         num_codes = (static_cast<unsigned int>(byte_0) * 0x0100) + static_cast<unsigned int>(byte_1);
     }
 
-    std::vector <struct huffman::symbol_len_encode> huffman_nodes;
+    std::vector <struct huffman::huffman_decode_tree::symbol_len_encode> huffman_nodes;
     huffman_nodes.reserve(num_codes);
 
     // iterate through each symbol table in header and build the list of nodes
@@ -123,7 +123,7 @@ int main (int argc, char* argv[])
             in_f.get(tmp);
             byte_code += static_cast<std::uint8_t>(tmp) << (8*i);
         }
-        huffman::symbol_len_encode sle{ symbol, static_cast<std::uint8_t>(enc_len), byte_code};
+        struct huffman::huffman_decode_tree::symbol_len_encode sle{ symbol, static_cast<std::uint8_t>(enc_len), byte_code};
         huffman_nodes.push_back(std::move(sle));
     }
 

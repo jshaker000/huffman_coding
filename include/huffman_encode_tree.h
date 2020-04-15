@@ -8,17 +8,6 @@
 
 namespace huffman
 {
-    struct symb_freq
-    {
-        char symbol;
-        std::uint64_t frequency;
-    };
-
-    struct len_encode
-    {
-        std::uint8_t  length;
-        std::uint64_t encoding;
-    };
 
     class huffman_encode_tree
     {
@@ -26,8 +15,18 @@ namespace huffman
             // expects array of <symbol,frequency> pairs sorted in descending order by frequency
             // used to fill a map of chars -> (length, code)
             // to easily read in bytes and encode them
-            huffman_encode_tree(const std::array<struct huffman::symb_freq,256> &);
-            void fill_unordered_map (std::unordered_map<char, struct huffman::len_encode> & );
+            struct symb_freq
+            {
+                char symbol;
+                std::uint64_t frequency;
+            };
+            huffman_encode_tree(const std::array<struct huffman::huffman_encode_tree::symb_freq,256> &);
+            struct len_encode
+            {
+                std::uint8_t  length;
+                std::uint64_t encoding;
+            };
+            void fill_unordered_map (std::unordered_map<char, struct huffman::huffman_encode_tree::len_encode> &) const;
         private:
             struct huffman_node
             {
@@ -38,10 +37,13 @@ namespace huffman
             };
 
             //prohibit copy constructor
-            huffman_encode_tree    (const huffman_encode_tree &);
-            void   operator=(huffman_encode_tree);
+            huffman_encode_tree(const huffman_encode_tree &);
+            void   operator=   (huffman_encode_tree);
 
-            void recursive_fill (std::unordered_map<char, struct huffman::len_encode> &, const huffman_encode_tree::huffman_node *, std::uint8_t, std::uint64_t) const;
+            void recursive_fill (std::unordered_map<char, struct huffman::huffman_encode_tree::len_encode> &,
+                                const huffman_encode_tree::huffman_node *,
+                                std::uint8_t,
+                                std::uint64_t) const;
             // root node
             std::unique_ptr<struct huffman_encode_tree::huffman_node> root_node;
     };

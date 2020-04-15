@@ -3,7 +3,7 @@
 
 // takes in a list of nodes with their symbol, depth, and position and maps into a tree
 // right now, no error checking
-huffman::huffman_decode_tree::huffman_decode_tree(const std::vector<struct huffman::symbol_len_encode> &nodes)
+huffman::huffman_decode_tree::huffman_decode_tree(const std::vector<struct huffman::huffman_decode_tree::symbol_len_encode> &nodes)
 {
     root_node.reset(new huffman::huffman_decode_tree::huffman_node);
     for (auto const &n : nodes)
@@ -40,7 +40,8 @@ huffman::huffman_decode_tree::huffman_decode_tree(const std::vector<struct huffm
 // moving working_ptr in direction d and return if the new position is valid (non nullptr),
 // is a leaf, and the data under it.
 // Used so you to can traverse the tree, find data, reset, etc to decode huffman encoded file
-struct huffman::decode_status huffman::huffman_decode_tree::move_direction(huffman::huffman_decode_tree::Direction d)
+// you can go in Direction::NONE to reobserve the current state
+struct huffman::huffman_decode_tree::decode_status huffman::huffman_decode_tree::move_direction(huffman::huffman_decode_tree::Direction d)
 {
     if (d == huffman::huffman_decode_tree::Direction::RESET)
     {
@@ -63,7 +64,7 @@ struct huffman::decode_status huffman::huffman_decode_tree::move_direction(huffm
     bool is_leaf  = is_valid && working_ptr->left == nullptr && working_ptr->right == nullptr;
     char symbol   = is_leaf ? working_ptr->data : 0x00;
 
-    struct huffman::decode_status ds{ is_valid, is_leaf, symbol };
+    struct huffman::huffman_decode_tree::decode_status ds{ is_valid, is_leaf, symbol };
 
     return ds;
 }

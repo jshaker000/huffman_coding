@@ -61,7 +61,7 @@ int main (int argc, char* argv[])
     std::unique_ptr<char[]> in_buffer(new char [in_buffsize]);
 
     //stores ASCII_CODE, FREQUENCY
-    std::array<struct huffman::symb_freq,256> frequencies;
+    std::array<struct huffman::huffman_encode_tree::symb_freq,256> frequencies;
 
     for (size_t i = 0; i < frequencies.size(); i++)
     {
@@ -100,7 +100,7 @@ int main (int argc, char* argv[])
     }
 
     // fill unordered map
-    std::unordered_map<char, struct huffman::len_encode> huffman_map;
+    std::unordered_map<char, struct huffman::huffman_encode_tree::len_encode> huffman_map;
     {
         huffman::huffman_encode_tree encode_tree(frequencies);
         encode_tree.fill_unordered_map(huffman_map);
