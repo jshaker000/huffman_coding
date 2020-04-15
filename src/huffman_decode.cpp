@@ -87,7 +87,7 @@ int main (int argc, char* argv[])
 
     std::fstream in_f(in, std::ios::binary | std::ios::in);
 
-    if ( in_f.fail() )
+    if (in_f.fail())
     {
         std::cerr << "DECODE: Error opening " << in << std::endl;
         return 2;
