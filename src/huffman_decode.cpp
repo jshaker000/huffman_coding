@@ -141,9 +141,9 @@ int main (int argc, char* argv[])
 
     huffman::huffman_decode_tree decode_tree(huffman_nodes);
 
-    char second_to_last_byte_read;
-    char last_byte_read;
-    bool first_time = true;
+    char second_to_last_byte_read = '\0';
+    char last_byte_read           = '\0';
+    bool first_time               = true;
     // extract the next bit and traverse the tree until we hit a leaf
     // write to a file
     // the last 2 bytes in the file must be treated differently as they have the last code and the num bits of the
@@ -153,6 +153,11 @@ int main (int argc, char* argv[])
         in_f.read (in_buffer.get(), in_buffsize);
         if (in_f.gcount() == 1)
         {
+            if (first_time)
+            {
+                std::cerr << "Decode: Error Parsing File!" << std::endl;
+                return 5;
+            }
             second_to_last_byte_read = last_byte_read;
             last_byte_read           = in_buffer.get()[0];
         }
