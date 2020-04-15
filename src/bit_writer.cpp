@@ -5,7 +5,7 @@
 huffman::bit_writer::bit_writer (const std::string &out)
 {
     buffer = std::unique_ptr<char[]>(new char[buff_size]);
-    std::for_each(buffer.get(), buffer.get()+buff_size, [](auto &n){ n = '\0'; });
+    std::fill(buffer.get(), buffer.get()+buff_size, '\0');
     out_f.open(out, std::ios::binary | std::ios::app);
 }
 
@@ -45,7 +45,7 @@ void huffman::bit_writer::add_bits(std::uint8_t num_bits_to_add, std::uint64_t b
                 out_f.write(buffer.get(), buff_size);
                 index_to_add =  0;
                 current_bits = -1;
-                std::for_each(buffer.get(), buffer.get()+buff_size, [](auto &n){ n = '\0'; });
+                std::fill(buffer.get(), buffer.get()+buff_size, '\0');
             }
         }
         current_bits++;
