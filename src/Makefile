@@ -23,9 +23,12 @@ MAINS   := $(patsubst %,${ODIR}/%,${_MAINS})
 _OBJ    := $(patsubst %.h,%.o,${_DEPS}) ${_MAINS}
 OBJ     := $(patsubst %,${ODIR}/%,${_OBJ})
 
-.PHONY: all install uninstall remove clean
+.PHONY: all test install uninstall remove clean
 
 all: ${TARGETS}
+
+test: all
+	${SRCDIR}/./test.sh
 
 install: all
 	for i in ${TARGETS}; do cp -f $$i ${INSTALLDIR}/$$i; done

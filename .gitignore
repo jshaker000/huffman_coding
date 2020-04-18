@@ -1,8 +1,12 @@
 # Compiled source #
 ###################
-huffman_decode
-huffman_encode
-huffman_codes
+src/huffman_decode
+src/huffman_encode
+src/huffman_codes
+
+src/.HUFFMAN_CODING_REGRESSION_TMP_FILE
+src/.HUFFMAN_CODING_REGRESSION_FAILS_FILE
+
 *.com
 *.class
 *.dll
