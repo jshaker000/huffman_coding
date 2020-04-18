@@ -30,7 +30,7 @@ int main (int argc, char* argv[])
     std::string in;
     std::string out;
 
-    if( isatty( STDIN_FILENO ) == 0 )
+    if(isatty(STDIN_FILENO) == 0)
     {
         std::cerr << "HUFFMAN ENCODE: Input must currently be from a file :(" << std::endl;
         return 1;
@@ -65,19 +65,19 @@ int main (int argc, char* argv[])
 
     for (size_t i = 0; i < frequencies.size(); i++)
     {
-        frequencies[i].symbol     = static_cast<char>(i);
+        frequencies[i].symbol    = static_cast<char>(i);
         frequencies[i].frequency = 0;
     }
 
-    //do a first pass through the file counting frequencies
     while (in_f)
     {
-        in_f.read (in_buffer.get(), in_buffsize);
-        for (int i = 0; i < in_f.gcount(); i++)
+        in_f.read(in_buffer.get(), in_buffsize);
+        std::for_each(in_buffer.get(), in_buffer.get()+in_f.gcount(),
+        [&](auto c)
         {
-            int index = in_buffer.get()[i] >= 0 ? in_buffer.get()[i] : in_buffer.get()[i] + 0x0100;
+            size_t index = c >= 0 ? c : c + 0x0100;
             frequencies[index].frequency += 1;
-        }
+        });
     }
 
     //sort by frequency
@@ -89,9 +89,13 @@ int main (int argc, char* argv[])
 
     // number the non zero frequencies
     int num_unique_chars = 0;
-
-    for (size_t i = 0; i < frequencies.size() && frequencies[i].frequency != 0; i++)
-        num_unique_chars++;
+    for (const auto &f: frequencies)
+    {
+        if (f.frequency != 0)
+        {
+            num_unique_chars++;
+        }
+    }
 
     if (num_unique_chars == 0)
     {
@@ -123,11 +127,12 @@ int main (int argc, char* argv[])
 
     // print symbol codes to the file
     // SYMBOL[1 byte]  LENGTH[1 byte]  CODE[LENGTH bytes]
-    for (int i = 0; i < num_unique_chars; i++)
+    std::for_each (frequencies.begin(), frequencies.begin()+num_unique_chars,
+    [&] (const auto &f)
     {
-        std::uint8_t  symbol     = frequencies[i].symbol;
-        std::uint8_t  symbol_len = huffman_map[(frequencies[i].symbol)].length;
-        std::uint64_t symbol_enc = huffman_map[(frequencies[i].symbol)].encoding;
+        std::uint8_t  symbol     = f.symbol;
+        std::uint8_t  symbol_len = huffman_map[f.symbol].length;
+        std::uint64_t symbol_enc = huffman_map[f.symbol].encoding;
         out_f.put(static_cast<char>(symbol));
         out_f.put(static_cast<char>(symbol_len));
 
@@ -139,7 +144,7 @@ int main (int argc, char* argv[])
              symbol_enc >>= 8;
         }
         new_length_bits += 8*(1+1+bytes_to_print); // symbol, length, encoding
-    }
+    });
 
     out_f.close();
     in_f.clear();
@@ -150,12 +155,13 @@ int main (int argc, char* argv[])
         while (in_f)
         {
             in_f.read (in_buffer.get(), in_buffsize);
-            for (int i = 0; i < in_f.gcount(); i++)
+            std::for_each(in_buffer.get(), in_buffer.get()+in_f.gcount(),
+            [&](const auto c)
             {
-                b.add_bits(huffman_map[(in_buffer.get()[i])].length, huffman_map[(in_buffer.get()[i])].encoding);
-                new_length_bits += huffman_map[(in_buffer.get()[i])].length;
+                b.add_bits(huffman_map[c].length, huffman_map[c].encoding);
+                new_length_bits += huffman_map[c].length;
                 old_length_bits += 8;
-            }
+            });
         }
         new_length_bits += 8; // tag byte
     }
@@ -163,7 +169,7 @@ int main (int argc, char* argv[])
     in_f.close();
 
     std::cerr << "HUFFMAN ENCODE: DEFALTION RATE: " << std::setprecision(4)
-              << static_cast<float>(100*new_length_bits)/old_length_bits << '%' << std::endl;
+              << static_cast<double>(100*new_length_bits)/old_length_bits << '%' << std::endl;
 
     return 0;
 

@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstdlib>
 #include <iostream>
 #include <vector>
@@ -9,11 +10,14 @@
 huffman::encode_tree::encode_tree(const std::array<struct huffman::encode_tree::symb_freq,256> & frequency)
 {
     // find the bottommost nonzero frequency symbol
-    int position = -1;
-    while (position != 255 && frequency[position+1].frequency != 0)
-        position++;
-
-    const int num_unique = position + 1;
+    int num_unique = 0;
+    for (const auto &f: frequency)
+    {
+        if (f.frequency != 0)
+        {
+            num_unique++;
+        }
+    }
 
     //special case of input file only having 0/1 distinct character
     if (num_unique == 0) // error
@@ -41,13 +45,14 @@ huffman::encode_tree::encode_tree(const std::array<struct huffman::encode_tree::
     std::vector<std::unique_ptr<struct huffman::encode_tree::huffman_node>> node_list;
     node_list.reserve(num_unique);
 
-    for (int i = 0; i < num_unique; i++)
+    std::for_each(frequency.begin(), frequency.begin() + num_unique,
+    [&] (const auto &f)
     {
         std::unique_ptr<struct huffman::encode_tree::huffman_node> tmp(new struct huffman::encode_tree::huffman_node);
-        tmp->data      = frequency[i].symbol;
-        tmp->frequency = frequency[i].frequency;
+        tmp->data      = f.symbol;
+        tmp->frequency = f.frequency;
         node_list.push_back(std::move(tmp));
-    }
+    });
 
     // loop through the list of nodes and take the bottom two and put them into a new node until
     // everything is under one big tree

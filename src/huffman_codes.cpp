@@ -42,7 +42,7 @@ int main (int argc, char* argv[])
 
     std::fstream in_f(in, std::ios::binary | std::ios::in);
 
-    if ( in_f.fail() )
+    if (in_f.fail())
     {
         std::cerr << "HUFMAN CODES: Error opening " << in << std::endl;
         return 2;
@@ -56,20 +56,19 @@ int main (int argc, char* argv[])
 
     for (size_t i = 0; i < frequencies.size(); i++)
     {
-        frequencies[i].symbol     = static_cast<char>(i);
+        frequencies[i].symbol    = static_cast<char>(i);
         frequencies[i].frequency = 0;
     }
 
-    int num_unique_chars = 0;
-
     while (in_f)
     {
-        in_f.read (buffer.get(), buffsize);
-        for (int i = 0; i < in_f.gcount(); i++)
+        in_f.read(buffer.get(), buffsize);
+        std::for_each(buffer.get(), buffer.get()+in_f.gcount(),
+        [&](auto c)
         {
-            int index = buffer.get()[i] >= 0 ? buffer.get()[i] : buffer.get()[i] + 0x0100;
+            size_t index = c >= 0 ? c : c + 0x0100;
             frequencies[index].frequency += 1;
-        }
+        });
     }
     in_f.close();
 
@@ -81,10 +80,15 @@ int main (int argc, char* argv[])
              );
 
     // non zero frequencies
-    for (size_t i = 0; i < frequencies.size() && frequencies[i].frequency != 0; i++)
+    int num_unique_chars = 0;
+    std::for_each(frequencies.begin(), frequencies.end(),
+    [&](const auto &f)
     {
-        num_unique_chars++;
-    }
+        if (f.frequency != 0)
+        {
+            num_unique_chars++;
+        }
+    });
 
     if (num_unique_chars == 0)
     {
@@ -115,28 +119,26 @@ int main (int argc, char* argv[])
               << "|    ASCII    | Frequency |       HUFFMAN Code        | New Length (bits) |" << '\n'
               << "+-------------+-----------+---------------------------+-------------------+" << std::endl;
 
-    for (size_t i = 0; i < frequencies.size(); i++)
+    std::for_each (frequencies.begin(), frequencies.begin()+num_unique_chars,
+    [&](const auto & f)
     {
-        if  (frequencies[i].frequency != 0)
-        {
-            std::string code = huffman::to_binary(static_cast<char>(huffman_map[frequencies[i].symbol].encoding),
-                                                  huffman_map[frequencies[i].symbol].length);
+        std::string code = huffman::to_binary(static_cast<char>(huffman_map[f.symbol].encoding),
+                                                  huffman_map[f.symbol].length);
 
-            out_f     << "| " << std::setw(10) << huffman::printable_ascii(frequencies[i].symbol) << "  | "
-                      << std::setw(9)  << frequencies[i].frequency << " | "
-                      << std::setw(25) << code << " | "
-                      << std::setw(17) << code.length() << " |" << std::endl;
+        out_f     << "| " << std::setw(10) << huffman::printable_ascii(f.symbol) << "  | "
+                  << std::setw(9)  << f.frequency << " | "
+                  << std::setw(25) << code << " | "
+                  << std::setw(17) << code.length() << " |" << std::endl;
 
-            old_length_bits += 8 * frequencies[i].frequency;
-            new_length_bits += code.length() * frequencies[i].frequency;
-        }
-    }
+        old_length_bits += 8 * f.frequency;
+        new_length_bits += code.length() * f.frequency;
+    });
 
     out_f     << "+-------------+-----------+-----END-huffman-codes-----+-------------------+" << '\n'
-              << "Old legnth (bytes): " << std::setw( 12 ) << ( old_length_bits >> 3 ) << '\n'
-              << "New length (bytes): " << std::setw( 12 ) << ( new_length_bits >> 3 ) << '\n'
-              << "DEFALTION RATE:           " << std::setprecision( 4 ) 
-              << static_cast<float>( 100 * new_length_bits ) / old_length_bits << '%' << std::endl;
+              << "Old legnth (bytes): " << std::setw(12) << (old_length_bits >> 3) << '\n'
+              << "New length (bytes): " << std::setw(12) << (new_length_bits >> 3) << '\n'
+              << "DEFALTION RATE:           " << std::setprecision( 4 )
+              << static_cast<double>(100 * new_length_bits) / old_length_bits << '%' << std::endl;
 
     return 0;
 
