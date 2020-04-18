@@ -21,6 +21,7 @@ std::string huffman::to_binary(std::uint64_t num, std::uint8_t bits)
     }
     else
     {
+        s.reserve(bits);
         for (std::uint8_t i = 0; i < bits; i++)
         {
             s = static_cast<char>((num & 0x01) + '0') + s;
@@ -54,7 +55,7 @@ std::string huffman::printable_ascii(unsigned char c)
             // hex
             else
             {
-                char high  = ((c&0xF0) >> 4);
+                char high  = ((c>>4) & 0x0F);
                 char low   = ((c&0x0F));
                 s += (high >= 0x0A ? high+'A'-0x0A : high+'0');
                 s += (low  >= 0x0A ? low +'A'-0x0A : low +'0');
