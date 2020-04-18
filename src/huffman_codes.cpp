@@ -122,16 +122,14 @@ int main (int argc, char* argv[])
     std::for_each (frequencies.begin(), frequencies.begin()+num_unique_chars,
     [&](const auto & f)
     {
-        std::string code = huffman::to_binary(static_cast<char>(huffman_map[f.symbol].encoding),
-                                                  huffman_map[f.symbol].length);
-
+        const auto &enc = huffman_map[f.symbol];
         out_f     << "| " << std::setw(10) << huffman::printable_ascii(f.symbol) << "  | "
                   << std::setw(9)  << f.frequency << " | "
-                  << std::setw(25) << code << " | "
-                  << std::setw(17) << code.length() << " |" << std::endl;
+                  << std::setw(25) << huffman::to_binary(enc.encoding, enc.length) << " | "
+                  << std::setw(17) << static_cast<int>(enc.length) << " |" << std::endl;
 
         old_length_bits += 8 * f.frequency;
-        new_length_bits += code.length() * f.frequency;
+        new_length_bits += enc.length * f.frequency;
     });
 
     out_f     << "+-------------+-----------+-----END-huffman-codes-----+-------------------+" << '\n'

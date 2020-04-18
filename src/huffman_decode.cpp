@@ -12,6 +12,7 @@
 // LAST BYTE HOLDS A TAG 1 - 8, saying how many bits of the second to last byte is encoded data 
     // vs a pad
 
+#include <algorithm>
 #include <cstdint>
 #include <cstdlib>
 #include <iostream>
@@ -37,9 +38,9 @@ static void traverse_tree_write(std::uint8_t num_bits_to_read,
 {
     for (int j = 0; j < num_bits_to_read; j++)
     {
-        huffman::decode_tree::Direction d = ((byte_to_read >> (7-j)) & 0x01) == 0x01 ? huffman::decode_tree::Direction::RIGHT :
-                                                    huffman::decode_tree::Direction::LEFT;
-        struct huffman::decode_tree::decode_status traverse_result = decode_tree.move_direction(d);
+        const huffman::decode_tree::Direction d = ((byte_to_read >> (7-j)) & 0x01) == 0x01 ? huffman::decode_tree::Direction::RIGHT :
+                                                  huffman::decode_tree::Direction::LEFT;
+        const struct huffman::decode_tree::decode_status traverse_result = decode_tree.move_direction(d);
         if (traverse_result.is_valid && traverse_result.is_leaf)
         {
             out_buffer[out_buff_bytes] = traverse_result.symbol;
@@ -156,14 +157,15 @@ int main (int argc, char* argv[])
 
 
     huffman::decode_tree decode_tree(huffman_nodes);
-
     char second_to_last_byte_read = '\0';
     char last_byte_read           = '\0';
     bool first_time               = true;
+
     // extract the next bit and traverse the tree until we hit a leaf
     // write to a file
     // the last 2 bytes in the file must be treated differently as they have the last code and the num bits of the
     // last byte to read
+    // So we wrtie those at the start of the next loop, instead of the end of the current one.
     while (in_f)
     {
         in_f.read (in_buffer.get(), in_buffsize);
@@ -192,30 +194,28 @@ int main (int argc, char* argv[])
             second_to_last_byte_read = in_buffer.get()[in_f.gcount()-2];
             last_byte_read           = in_buffer.get()[in_f.gcount()-1];
         }
-        // loop all bytes read except for the last 2 iff they are the last 2 in the file
-        for (int i = 0; (in_f && i < in_f.gcount() - 1) || (!in_f && i < in_f.gcount() - 2); i++)
+        // loop all bytes read except for the last 1 (to be written in next iteration), or last 2 iff they are the last 2 in the file
+        std::for_each(in_buffer.get(), in_buffer.get() + in_f.gcount() - (in_f ? 1 : 2),
+        [&] (auto const c)
         {
             traverse_tree_write(8,
-                                static_cast<std::uint8_t>(in_buffer.get()[i]),
+                                static_cast<std::uint8_t>(c),
                                 decode_tree,
                                 out_buffer.get(),
                                 out_buffsize,
                                 out_buff_bytes,
                                 out_f);
-        }
-        // read in only as many bits from the second to last byte as stated in the last byte
-        if (!in_f)
-        {
-            traverse_tree_write(static_cast<std::uint8_t>(last_byte_read),
-                                static_cast<std::uint8_t>(second_to_last_byte_read),
-                                decode_tree,
-                                out_buffer.get(),
-                                out_buffsize,
-                                out_buff_bytes,
-                                out_f);
-        }
+        });
         first_time = false;
     }
+    // write second to last byte as based on last byte
+    traverse_tree_write(static_cast<std::uint8_t>(last_byte_read),
+                        static_cast<std::uint8_t>(second_to_last_byte_read),
+                        decode_tree,
+                        out_buffer.get(),
+                        out_buffsize,
+                        out_buff_bytes,
+                        out_f);
     out_f.write(out_buffer.get(), out_buff_bytes);
     return 0;
 }

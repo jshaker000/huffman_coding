@@ -158,8 +158,9 @@ int main (int argc, char* argv[])
             std::for_each(in_buffer.get(), in_buffer.get()+in_f.gcount(),
             [&](const auto c)
             {
-                b.add_bits(huffman_map[c].length, huffman_map[c].encoding);
-                new_length_bits += huffman_map[c].length;
+                const auto &enc = huffman_map[c];
+                b.add_bits(enc.length, enc.encoding);
+                new_length_bits += enc.length;
                 old_length_bits += 8;
             });
         }
