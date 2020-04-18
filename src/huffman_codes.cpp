@@ -1,4 +1,6 @@
 // prints the huffman codes of a file in a nicely formatted table
+// This also provides an approx deflation rate, but it isnt extremely accurate
+// as it doesnt include the size of the header table
 
 #include <algorithm>
 #include <array>
@@ -34,7 +36,7 @@ int main (int argc, char* argv[])
     }
     else
     {
-        std::cerr << "CODES: Synatx: huffman_codes <in file> <outfile>" << std::endl;
+        std::cerr << "HUFMAN CODES: Synatx: huffman_codes <in file> <outfile>" << std::endl;
         return 1;
     }
 
@@ -42,7 +44,7 @@ int main (int argc, char* argv[])
 
     if ( in_f.fail() )
     {
-        std::cerr << "CODES: Error opening " << in << std::endl;
+        std::cerr << "HUFMAN CODES: Error opening " << in << std::endl;
         return 2;
     }
 
@@ -86,7 +88,7 @@ int main (int argc, char* argv[])
 
     if (num_unique_chars == 0)
     {
-        std::cerr << "CODES: In file appears to be empty. Exiting" << std::endl;
+        std::cerr << "HUFMAN CODES: In file appears to be empty. Exiting" << std::endl;
         return 3;
     }
 
@@ -100,7 +102,7 @@ int main (int argc, char* argv[])
     std::fstream out_f(out, std::ios::binary | std::ios::out);
     if (out_f.fail())
     {
-        std::cerr << "CODES: Error opening " << out << std::endl;
+        std::cerr << "HUFMAN CODES: Error opening " << out << std::endl;
         return 4;
     }
 

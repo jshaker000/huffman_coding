@@ -53,7 +53,7 @@ static void traverse_tree_write(std::uint8_t num_bits_to_read,
         }
         else if (!traverse_result.is_valid)
         {
-            std::cerr << "Huffman Decode: Error Parsing File (traversing symbol tree)" << std::endl;
+            std::cerr << "HUFMAN DECODE: Error Parsing File (traversing symbol tree)" << std::endl;
             std::exit(-1);
         }
     }
@@ -77,7 +77,7 @@ int main (int argc, char* argv[])
     }
     else
     {
-        std::cerr << "DECODE: Synatx: huffman_decode <infile> <outfile>" << std::endl;
+        std::cerr << "HUFFMAN DECODE: Synatx: huffman_decode <infile> <outfile>" << std::endl;
         return 1;
     }
 
@@ -85,7 +85,7 @@ int main (int argc, char* argv[])
 
     if (in_f.fail())
     {
-        std::cerr << "DECODE: Error opening " << in << std::endl;
+        std::cerr << "HUFFMAN DECODE: Error opening " << in << std::endl;
         return 2;
     }
     // bug if this equals 1 (and its slower anyway so don't do that)
@@ -100,7 +100,7 @@ int main (int argc, char* argv[])
         in_f.get(byte_1);
         if (in_f.fail())
         {
-            std::cerr << "DECODE: Error parsing input file." << std::endl;
+            std::cerr << "HUFFMAN DECODE: Error parsing input file." << std::endl;
             return 3;
         }
         num_codes = (static_cast<size_t>(static_cast<std::uint8_t>(byte_0) & 0xFF) * 0x0100)
@@ -122,7 +122,7 @@ int main (int argc, char* argv[])
         in_f.get(enc_len);
         if (in_f.fail())
         {
-            std::cerr << "DECODE: Error parsing input file." << std::endl;
+            std::cerr << "HUFFMAN DECODE: Error parsing input file." << std::endl;
             return 3;
         }
 
@@ -134,7 +134,7 @@ int main (int argc, char* argv[])
             in_f.get(tmp);
             if (in_f.fail())
             {
-                std::cerr << "DECODE: Error parsing input file." << std::endl;
+                std::cerr << "HUFFMAN DECODE: Error parsing input file." << std::endl;
                 return 3;
             }
             byte_code += static_cast<uint64_t>((static_cast<std::uint8_t>(tmp) & 0xFF)) << (8*i);
@@ -146,7 +146,7 @@ int main (int argc, char* argv[])
     std::fstream out_f(out, std::ios::binary | std::ios::out);
     if (out_f.fail())
     {
-        std::cerr << "DECODE: Error opening " << out << std::endl;
+        std::cerr << "HUFFMAN DECODE: Error opening " << out << std::endl;
         return 4;
     }
 
