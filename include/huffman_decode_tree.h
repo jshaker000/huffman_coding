@@ -17,11 +17,14 @@ namespace huffman
                 std::uint8_t  length;
                 std::uint64_t encoding;
             };
+            // construct tree from <symbol, length of encoding, encoding>
+            // Does not check if the tree is valid
             huffman_decode_tree(const std::vector<struct huffman::huffman_decode_tree::symbol_len_encode> &);
             // moving working_ptr in direction d and return if the new position is valid (non nullptr),
             // if it is a leaf, and the data under it.
             // In this way, you can put in one bit at a time and find if you've reached a leaf or not,
-            // then Direction::RESET and continue
+            // and then output that symbol.
+            // Then go in Direction::RESET and input the next sequence
             // you can go in Direction::NONE to reobserve the current state
             enum class Direction{RESET, LEFT, RIGHT, NONE};
             struct decode_status
