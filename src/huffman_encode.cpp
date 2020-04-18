@@ -130,13 +130,14 @@ int main (int argc, char* argv[])
     std::for_each (frequencies.begin(), frequencies.begin()+num_unique_chars,
     [&] (const auto &f)
     {
-        std::uint8_t  symbol     = f.symbol;
-        std::uint8_t  symbol_len = huffman_map[f.symbol].length;
-        std::uint64_t symbol_enc = huffman_map[f.symbol].encoding;
+        const auto & enc = huffman_map[f.symbol];
+        const std::uint8_t  symbol     = f.symbol;
+        const std::uint8_t  symbol_len = enc.length;
+        std::uint64_t symbol_enc       = enc.encoding;
         out_f.put(static_cast<char>(symbol));
         out_f.put(static_cast<char>(symbol_len));
 
-        int bytes_to_print = symbol_len%8 == 0 ? symbol_len/8 : symbol_len/8  + 1;
+        const int bytes_to_print = symbol_len%8 == 0 ? symbol_len/8 : symbol_len/8  + 1;
         // print the symbol, LSBS first
         for (int j = 0; j < bytes_to_print; j++)
         {
