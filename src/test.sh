@@ -1,8 +1,8 @@
 #!/bin/bash
 
-TMP_FILE=$PWD/.HUFFMAN_CODING_REGRESSION_TMP_FILE
-FAILS_FILE=$PWD/.HUFFMAN_CODING_REGRESSION_FAILS_FILE
-TEST_DIR=$PWD/..
+[[ -z $TMP_FILE ]]   && TMP_FILE=$PWD/.HUFFMAN_CODING_REGRESSION_TMP_FILE
+[[ -z $FAILS_FILE ]] && FAILS_FILE=$PWD/.HUFFMAN_CODING_REGRESSION_FAILS_FILE
+[[ -z $TEST_DIR ]]   && TEST_DIR=$PWD/..
 
 rm -rf $FAILS_FILE
 rm -rf $TMP_FILE
@@ -10,7 +10,7 @@ rm -rf $TMP_FILE
 echo "Starting Huffman Coding Regression. Will try to encode, decode, and diff a group of files,"
 echo "By default, tests the contents of this git repo."
 
-for test_file in $(find $PWD/..)
+for test_file in $(find $TEST_DIR)
 do
     if [[ -s $test_file && -f $test_file  ]]
     then
