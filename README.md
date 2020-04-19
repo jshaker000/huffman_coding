@@ -21,7 +21,7 @@ Huffman Encoding also places a header infront of the encoded
 data. If the file is small enough, the gained compression
 may not be worth the cost of the header.
 
-For more Information [Wikipedia] (https://en.wikipedia.org/wiki/Huffman_coding)
+For more Information [Wikipedia](https://en.wikipedia.org/wiki/Huffman_coding)
 
 ## Contents
 This program comes with 3 executables:
