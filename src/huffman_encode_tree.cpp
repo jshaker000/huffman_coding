@@ -46,7 +46,7 @@ huffman::encode_tree::encode_tree(const std::array<struct huffman::encode_tree::
     node_list.reserve(num_unique);
 
     std::for_each(frequency.begin(), frequency.begin() + num_unique,
-    [&] (const auto &f)
+    [&node_list] (const auto &f)
     {
         std::unique_ptr<struct huffman::encode_tree::huffman_node> tmp(new struct huffman::encode_tree::huffman_node);
         tmp->data      = f.symbol;

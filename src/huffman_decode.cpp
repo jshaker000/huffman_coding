@@ -196,7 +196,7 @@ int main (int argc, char* argv[])
         }
         // loop all bytes read except for the last 1 (to be written in next iteration), or last 2 iff they are the last 2 in the file
         std::for_each(in_buffer.get(), in_buffer.get() + in_f.gcount() - (in_f ? 1 : 2),
-        [&] (auto const c)
+        [&decode_tree, &out_buffer, &out_buffsize, &out_buff_bytes, &out_f] (auto const c)
         {
             traverse_tree_write(8,
                                 static_cast<std::uint8_t>(c),

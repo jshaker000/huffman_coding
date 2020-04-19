@@ -64,7 +64,7 @@ int main (int argc, char* argv[])
     {
         in_f.read(buffer.get(), buffsize);
         std::for_each(buffer.get(), buffer.get()+in_f.gcount(),
-        [&](auto c)
+        [&frequencies](auto c)
         {
             size_t index = c >= 0 ? c : c + 0x0100;
             frequencies[index].frequency += 1;
@@ -82,7 +82,7 @@ int main (int argc, char* argv[])
     // non zero frequencies
     int num_unique_chars = 0;
     std::for_each(frequencies.begin(), frequencies.end(),
-    [&](const auto &f)
+    [&num_unique_chars](const auto &f)
     {
         if (f.frequency != 0)
         {
@@ -110,17 +110,17 @@ int main (int argc, char* argv[])
         return 4;
     }
 
-    std::uint64_t old_length_bits = 0;
-    std::uint64_t new_length_bits = 0;
-
     out_f     << "FILE:               " << in               << '\n'
               << "NUM_UNIQUE_SYMBOLS: " << num_unique_chars << '\n'
               << "+-------------+-----------+----START-huffman-codes----+-------------------+" << '\n'
               << "|    ASCII    | Frequency |       HUFFMAN Code        | New Length (bits) |" << '\n'
               << "+-------------+-----------+---------------------------+-------------------+" << std::endl;
 
+    std::uint64_t old_length_bits = 0;
+    std::uint64_t new_length_bits = 0;
+
     std::for_each (frequencies.begin(), frequencies.begin()+num_unique_chars,
-    [&](const auto & f)
+    [&out_f, &huffman_map, &old_length_bits, &new_length_bits](const auto & f)
     {
         const auto &enc = huffman_map[f.symbol];
         out_f     << "| " << std::setw(10) << huffman::printable_ascii(f.symbol) << "  | "

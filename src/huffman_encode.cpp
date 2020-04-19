@@ -73,7 +73,7 @@ int main (int argc, char* argv[])
     {
         in_f.read(in_buffer.get(), in_buffsize);
         std::for_each(in_buffer.get(), in_buffer.get()+in_f.gcount(),
-        [&](auto c)
+        [&frequencies](auto c)
         {
             size_t index = c >= 0 ? c : c + 0x0100;
             frequencies[index].frequency += 1;
@@ -89,13 +89,14 @@ int main (int argc, char* argv[])
 
     // number the non zero frequencies
     int num_unique_chars = 0;
-    for (const auto &f: frequencies)
+    std::for_each(frequencies.begin(), frequencies.end(),
+    [&num_unique_chars](const auto & f)
     {
         if (f.frequency != 0)
         {
             num_unique_chars++;
         }
-    }
+    });
 
     if (num_unique_chars == 0)
     {
@@ -128,7 +129,7 @@ int main (int argc, char* argv[])
     // print symbol codes to the file
     // SYMBOL[1 byte]  LENGTH[1 byte]  CODE[LENGTH bytes]
     std::for_each (frequencies.begin(), frequencies.begin()+num_unique_chars,
-    [&] (const auto &f)
+    [&out_f, &huffman_map, &new_length_bits] (const auto &f)
     {
         const auto & enc = huffman_map[f.symbol];
         const std::uint8_t  symbol     = f.symbol;
@@ -157,7 +158,7 @@ int main (int argc, char* argv[])
         {
             in_f.read (in_buffer.get(), in_buffsize);
             std::for_each(in_buffer.get(), in_buffer.get()+in_f.gcount(),
-            [&](const auto c)
+            [&b, &huffman_map, &new_length_bits, &old_length_bits](const auto c)
             {
                 const auto &enc = huffman_map[c];
                 b.add_bits(enc.length, enc.encoding);
@@ -174,5 +175,4 @@ int main (int argc, char* argv[])
               << static_cast<double>(100*new_length_bits)/old_length_bits << '%' << std::endl;
 
     return 0;
-
 }

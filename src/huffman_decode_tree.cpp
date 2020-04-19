@@ -1,12 +1,15 @@
+#include <algorithm>
 #include <iostream>
 #include "huffman_decode_tree.h"
 
 // takes in a list of nodes with their symbol, depth, and position and maps into a tree
+// create new nodes as needed
 // right now, no error checking
 huffman::decode_tree::decode_tree(const std::vector<struct huffman::decode_tree::symbol_len_encode> &nodes)
 {
     root_node.reset(new huffman::decode_tree::huffman_node);
-    for (auto const &n : nodes)
+    std::for_each(nodes.begin(), nodes.end(),
+    [this] (const auto &n)
     {
         struct huffman::decode_tree::huffman_node *tmp_ptr = root_node.get();
         for (std::uint8_t i = 0; i < n.length; i++)
@@ -33,7 +36,7 @@ huffman::decode_tree::decode_tree(const std::vector<struct huffman::decode_tree:
                 tmp_ptr->data = n.symbol;
             }
         }
-    }
+    });
     working_ptr = root_node.get();
 }
 
