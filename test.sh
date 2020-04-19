@@ -2,7 +2,8 @@
 
 [[ -z $TMP_FILE ]]   && TMP_FILE=$PWD/.HUFFMAN_CODING_REGRESSION_TMP_FILE
 [[ -z $FAILS_FILE ]] && FAILS_FILE=$PWD/.HUFFMAN_CODING_REGRESSION_FAILS_FILE
-[[ -z $TEST_DIR ]]   && TEST_DIR=$PWD/..
+[[ -z $BUILD_DIR ]]  && BUILD_DIR=$PWD/build
+[[ -z $TEST_DIR ]]   && TEST_DIR=$PWD
 
 rm -rf $FAILS_FILE
 rm -rf $TMP_FILE
@@ -10,12 +11,22 @@ rm -rf $TMP_FILE
 echo "Starting Huffman Coding Regression. Will try to encode, decode, and diff a group of files,"
 echo "By default, tests the contents of this git repo."
 
+HENC=$BUILD_DIR/huffman_encode
+HDEC=$BUILD_DIR/huffman_decode
+
+if [[ ! -s $HENC ]] || [[ ! -s $HDEC ]]
+then
+    echo "Error finding huffman_encode: $HENC or huffman_decode: $HDEC"
+    echo "HUFFMAN CODING REGRESSION FAILURE!"
+    exit -1
+fi
+
 for test_file in $(find $TEST_DIR)
 do
     if [[ -s $test_file && -f $test_file  ]]
     then
         echo "Testing $test_file"
-        $PWD/huffman_encode $test_file 2>/dev/null | $PWD/huffman_decode > $TMP_FILE
+        $HENC $test_file 2>/dev/null | $HDEC > $TMP_FILE
         diff $test_file $TMP_FILE 1> /dev/null 2>/dev/null
         if [[ $? -ne 0 ]]
         then

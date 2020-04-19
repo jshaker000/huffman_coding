@@ -1,11 +1,18 @@
 # Compiled source #
 ###################
-src/huffman_decode
-src/huffman_encode
-src/huffman_codes
+Makefile
 
-src/.HUFFMAN_CODING_REGRESSION_TMP_FILE
-src/.HUFFMAN_CODING_REGRESSION_FAILS_FILE
+# cmake files
+build/
+*.cmake
+CMakeFiles/
+src/CMakeFiles/
+CMakeCache.txt
+install_manifest.txt
+
+# regression files
+.HUFFMAN_CODING_REGRESSION_TMP_FILE
+.HUFFMAN_CODING_REGRESSION_FAILS_FILE
 
 *.com
 *.class
@@ -13,6 +20,7 @@ src/.HUFFMAN_CODING_REGRESSION_FAILS_FILE
 *.exe
 *.o
 *.so
+*.a
 
 # Packages #
 ############
