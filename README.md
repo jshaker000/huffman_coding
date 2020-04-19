@@ -49,14 +49,14 @@ The executable will be in the *build/* dir.
 
 # Bugs And Future Work
 
--> allow huffman\_encode to read from a stream in
--> Figure out how to handle tree depths >= 64
--> Develop More Thorough Regression Suite
--> perhaps merge 3 executables into one with flags
+1. allow huffman\_encode to read from a stream in
+2. Figure out how to handle tree depths >= 64
+3. Develop More Thorough Regression Suite
+4. perhaps merge 3 executables into one with flags
 
-** UPDATES MAY CHANGE THE FILE FORMAT, THIS IS STILL IN BETA
-BE CAREFUL AND READ UPDATES TO THE README AND ROLL BACK
-IF YOU NEED TO
+*UPDATES MAY CHANGE THE FILE FORMAT, THIS IS STILL IN BETA*
+*BE CAREFUL AND READ UPDATES TO THE README AND ROLL BACK*
+*IF YOU NEED TO*
 
 If you find any other bugs or have any suggestions, please
 send them to jshakes213@gmail.com or open an issue on git
