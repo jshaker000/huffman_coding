@@ -25,7 +25,7 @@ huffman::encode_tree::encode_tree(const std::array<struct huffman::encode_tree::
         std::cerr << "Huffman Encode Tree: input frequency map seems to be empty!" << std::endl;
         std::exit(-1);
     }
-    if (num_unique == 1) // right now, each ndoe needs 0 or 2 children. So invert the symbol to make the other one
+    if (num_unique == 1) // right now, each node needs 0 or 2 children. So invert the symbol to make the other one
     {
         root_node.reset(new huffman::encode_tree::huffman_node);
         root_node->right.reset(new huffman::encode_tree::huffman_node);
@@ -37,7 +37,6 @@ huffman::encode_tree::encode_tree(const std::array<struct huffman::encode_tree::
         root_node->frequency        = frequency[0].frequency;
         root_node->right->frequency = frequency[0].frequency;
         root_node->left->frequency  = 0;
-
         return;
     }
 
@@ -100,7 +99,7 @@ const
         std::cerr << "Huffman Encode Tree: Tree depths >= 64 are not currently supported" << std::endl;
         std::exit(-1);
     }
-    if (root->left == nullptr && root->right == nullptr)
+    else if (root->left == nullptr && root->right == nullptr)
     {
         struct huffman::encode_tree::len_encode lc{len, huffman_code};
         map.emplace(root->data, lc);
